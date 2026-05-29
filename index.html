@@ -337,10 +337,10 @@ function renderClubs(clubs) {
   }
   grid.innerHTML = clubs.map(c => `
     <div class="club-card">
-      <div class="club-banner" style="background:linear-gradient(135deg,#1a1a30,#0a0a20);">${c.emoji||'🎯'}</div>
+      <div class="club-banner" style="background:linear-gradient(135deg,#1a1a30,#0a0a20);overflow:hidden;">${c.logo_url ? `<img src="${c.logo_url}" style="width:100%;height:100%;object-fit:cover;"/>` : (c.emoji||'🎯')}</div>
       <div class="club-body">
         <div class="club-top">
-          <div class="club-avatar">${c.emoji||'🎯'}</div>
+          <div class="club-avatar">${c.logo_url ? `<img src="${c.logo_url}" style="width:100%;height:100%;object-fit:cover;border-radius:10px;"/>` : (c.emoji||'🎯')}</div>
           <div>
             <div class="club-name">${c.name}</div>
             <div class="club-category">${c.category||'General'}</div>
@@ -388,7 +388,9 @@ async function loadEvents() {
   document.getElementById('eventsGrid').innerHTML = data.map(e => {
     const d = formatDate(e.event_date);
     return `
-    <div class="event-card">
+    <div class="event-card" style="${e.poster_url ? 'flex-direction:column;padding:0;overflow:hidden;' : ''}">
+      ${e.poster_url ? `<img src="${e.poster_url}" style="width:100%;height:180px;object-fit:cover;"/>` : ''}
+      <div style="${e.poster_url ? 'padding:1rem;display:flex;gap:1rem;' : 'display:flex;gap:1rem;width:100%;'}">
       <div class="event-date">
         <div class="event-month">${d.month}</div>
         <div class="event-day">${d.day}</div>
@@ -398,6 +400,7 @@ async function loadEvents() {
         <div class="event-club">${e.club_name||''}</div>
         <div class="event-desc">${e.description||''}</div>
         <button class="event-rsvp" onclick="this.textContent=this.textContent==='RSVP →'?'✓ Going!':'RSVP →';this.style.color=this.textContent==='✓ Going!'?'var(--accent3)':'';this.style.borderColor=this.textContent==='✓ Going!'?'var(--accent3)':''">RSVP →</button>
+      </div>
       </div>
     </div>`;
   }).join('');
@@ -443,6 +446,7 @@ async function loadAnnouncements() {
       <div class="feed-content">
         <div class="feed-title">${a.message}</div>
         <div class="feed-meta"><strong>${a.club_name||'Campus'}</strong> · ${timeAgo(a.created_at)}</div>
+        ${a.image_url ? `<img src="${a.image_url}" style="margin-top:.75rem;max-width:100%;max-height:280px;border-radius:10px;border:1px solid var(--border);object-fit:cover;display:block;"/>` : ''}
       </div>
     </div>
   `).join('');
