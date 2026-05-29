@@ -91,9 +91,36 @@
     .form-row{grid-template-columns:1fr;}
     .stats-row{grid-template-columns:1fr 1fr;}
   }
+
+  /* LOCK SCREEN */
+  .lock-screen{position:fixed;inset:0;background:var(--bg);z-index:999;display:flex;align-items:center;justify-content:center;padding:1rem;}
+  .lock-card{background:var(--surface);border:1px solid var(--border);border-radius:24px;padding:3rem 2.5rem;max-width:420px;width:100%;text-align:center;}
+  .lock-icon{font-size:3.5rem;margin-bottom:1.5rem;}
+  .lock-title{font-family:'Syne',sans-serif;font-weight:800;font-size:1.8rem;margin-bottom:.5rem;}
+  .lock-sub{color:var(--muted);font-size:.9rem;margin-bottom:2rem;line-height:1.6;}
+  .lock-input{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:1rem 1.2rem;color:var(--text);font-family:'DM Sans',sans-serif;font-size:1.1rem;outline:none;text-align:center;letter-spacing:.2em;margin-bottom:1rem;transition:border-color .2s;}
+  .lock-input:focus{border-color:var(--accent);}
+  .lock-btn{width:100%;background:var(--accent);color:#fff;border:none;padding:.9rem;border-radius:12px;font-family:'DM Sans',sans-serif;font-size:1rem;font-weight:600;cursor:pointer;transition:.2s;box-shadow:0 0 30px #6c63ff44;}
+  .lock-btn:hover{opacity:.85;}
+  .lock-error{color:#ff9eb5;font-size:.85rem;margin-top:.75rem;display:none;}
+  .lock-error.show{display:block;}
+  .lock-hint{color:var(--muted);font-size:.75rem;margin-top:1.5rem;border-top:1px solid var(--border);padding-top:1rem;}
 </style>
 </head>
 <body>
+
+<!-- LOCK SCREEN -->
+<div class="lock-screen" id="lockScreen">
+  <div class="lock-card">
+    <div class="lock-icon">🔐</div>
+    <div class="lock-title">Admin Access Only</div>
+    <div class="lock-sub">This panel is for club heads and admins only.<br/>Enter the password to continue.</div>
+    <input class="lock-input" type="password" id="lockPassword" placeholder="••••••••" onkeydown="if(event.key==='Enter') checkPassword()"/>
+    <button class="lock-btn" onclick="checkPassword()">Unlock Admin Panel →</button>
+    <div class="lock-error" id="lockError">❌ Wrong password. Try again.</div>
+    <div class="lock-hint">Contact your CampusHub admin to get the password.</div>
+  </div>
+</div>
 
 <div class="sidebar">
   <div>
@@ -495,6 +522,33 @@ async function deleteRow(table, id, reloadFn) {
   if(error) { showToast('❌ Error: ' + error.message); return; }
   showToast('🗑️ Deleted successfully');
   reloadFn();
+  loadDashboard();
+}
+
+// ─── PASSWORD LOCK ───
+const ADMIN_PASSWORD = 'campushub@2025';
+
+function checkPassword() {
+  const input = document.getElementById('lockPassword').value;
+  const error = document.getElementById('lockError');
+  if(input === ADMIN_PASSWORD) {
+    document.getElementById('lockScreen').style.display = 'none';
+    sessionStorage.setItem('campushub_auth', 'true');
+    loadDashboard();
+  } else {
+    error.classList.add('show');
+    document.getElementById('lockPassword').value = '';
+    document.getElementById('lockPassword').style.borderColor = '#ff6584';
+    setTimeout(() => {
+      error.classList.remove('show');
+      document.getElementById('lockPassword').style.borderColor = '';
+    }, 3000);
+  }
+}
+
+// Check if already authenticated this session
+if(sessionStorage.getItem('campushub_auth') === 'true') {
+  document.getElementById('lockScreen').style.display = 'none';
   loadDashboard();
 }
 
