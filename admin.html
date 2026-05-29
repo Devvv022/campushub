@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>CampusHub — Admin Panel</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap" rel="stylesheet"/>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  :root {
+    --bg:#0a0a0f; --surface:#12121a; --surface2:#1a1a26;
+    --border:#ffffff0f; --accent:#6c63ff; --accent2:#ff6584;
+    --accent3:#43e8b0; --text:#f0f0f8; --muted:#7a7a9a; --card:#15151f;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min-height:100vh;display:flex;}
+
+  /* SIDEBAR */
+  .sidebar{width:260px;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;padding:1.5rem;position:fixed;top:0;left:0;bottom:0;z-index:10;}
+  .sidebar-logo{font-family:'Syne',sans-serif;font-weight:800;font-size:1.3rem;letter-spacing:-0.03em;margin-bottom:.25rem;}
+  .sidebar-logo span{color:var(--accent);}
+  .sidebar-sub{font-size:.75rem;color:var(--muted);margin-bottom:2rem;}
+  .sidebar-nav{display:flex;flex-direction:column;gap:.25rem;flex:1;}
+  .nav-item{display:flex;align-items:center;gap:.75rem;padding:.75rem 1rem;border-radius:10px;cursor:pointer;font-size:.9rem;color:var(--muted);transition:.2s;border:none;background:none;width:100%;text-align:left;font-family:'DM Sans',sans-serif;}
+  .nav-item:hover{background:var(--surface2);color:var(--text);}
+  .nav-item.active{background:var(--accent)18;color:var(--accent);font-weight:500;}
+  .nav-icon{font-size:1.1rem;width:24px;text-align:center;}
+  .sidebar-footer{margin-top:auto;padding-top:1.5rem;border-top:1px solid var(--border);}
+  .back-link{display:flex;align-items:center;gap:.5rem;color:var(--muted);text-decoration:none;font-size:.85rem;transition:.2s;}
+  .back-link:hover{color:var(--text);}
+
+  /* MAIN */
+  .main{margin-left:260px;flex:1;padding:2.5rem;min-height:100vh;}
+  .page{display:none;}
+  .page.active{display:block;}
+
+  /* PAGE HEADER */
+  .page-header{margin-bottom:2rem;}
+  .page-title{font-family:'Syne',sans-serif;font-weight:800;font-size:1.8rem;letter-spacing:-0.03em;}
+  .page-desc{color:var(--muted);font-size:.9rem;margin-top:.3rem;}
+
+  /* CARDS */
+  .stats-row{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:1rem;margin-bottom:2rem;}
+  .stat-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:1.25rem;}
+  .stat-card-num{font-family:'Syne',sans-serif;font-weight:800;font-size:2rem;margin-bottom:.25rem;}
+  .stat-card-label{font-size:.8rem;color:var(--muted);}
+
+  /* FORM CARD */
+  .form-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:1.75rem;margin-bottom:2rem;}
+  .form-card h3{font-family:'Syne',sans-serif;font-weight:700;font-size:1.1rem;margin-bottom:1.25rem;display:flex;align-items:center;gap:.5rem;}
+  .form-row{display:grid;grid-template-columns:1fr 1fr;gap:1rem;}
+  .form-group{margin-bottom:1rem;}
+  .form-group label{display:block;font-size:.82rem;color:var(--muted);margin-bottom:.4rem;}
+  .form-group input,.form-group select,.form-group textarea{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:9px;padding:.7rem 1rem;color:var(--text);font-family:'DM Sans',sans-serif;font-size:.9rem;outline:none;transition:border-color .2s;}
+  .form-group input:focus,.form-group select:focus,.form-group textarea:focus{border-color:var(--accent);}
+  .form-group select option{background:var(--surface);}
+  .btn-submit{background:var(--accent);color:#fff;border:none;padding:.75rem 2rem;border-radius:10px;font-family:'DM Sans',sans-serif;font-size:.95rem;font-weight:500;cursor:pointer;transition:.2s;}
+  .btn-submit:hover{opacity:.85;}
+  .btn-submit:disabled{opacity:.5;cursor:not-allowed;}
+
+  /* DATA TABLE */
+  .data-card{background:var(--card);border:1px solid var(--border);border-radius:16px;overflow:hidden;margin-bottom:2rem;}
+  .data-card-header{padding:1.25rem 1.5rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+  .data-card-title{font-family:'Syne',sans-serif;font-weight:700;font-size:1rem;}
+  .data-table{width:100%;border-collapse:collapse;}
+  .data-table th{padding:.75rem 1.5rem;text-align:left;font-size:.75rem;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;border-bottom:1px solid var(--border);}
+  .data-table td{padding:.9rem 1.5rem;font-size:.88rem;border-bottom:1px solid var(--border05,#ffffff08);}
+  .data-table tr:last-child td{border-bottom:none;}
+  .data-table tr:hover td{background:#ffffff04;}
+  .badge{display:inline-block;padding:.2rem .6rem;border-radius:999px;font-size:.7rem;font-weight:600;}
+  .badge-green{background:#43e8b022;color:var(--accent3);}
+  .badge-red{background:#ff658422;color:#ff9eb5;}
+  .badge-purple{background:#6c63ff22;color:#a09bff;}
+  .btn-delete{background:none;border:1px solid #ff658433;color:#ff9eb5;padding:.3rem .7rem;border-radius:6px;font-size:.75rem;cursor:pointer;transition:.2s;font-family:'DM Sans',sans-serif;}
+  .btn-delete:hover{background:#ff658422;}
+  .btn-toggle{background:none;border:1px solid var(--border);color:var(--muted);padding:.3rem .7rem;border-radius:6px;font-size:.75rem;cursor:pointer;transition:.2s;font-family:'DM Sans',sans-serif;}
+  .btn-toggle:hover{border-color:var(--accent3);color:var(--accent3);}
+
+  .empty-row td{text-align:center;padding:2rem;color:var(--muted);}
+
+  /* TOAST */
+  .toast{position:fixed;bottom:2rem;right:2rem;background:var(--surface);border:1px solid var(--accent3);color:var(--text);padding:1rem 1.5rem;border-radius:12px;z-index:999;font-size:.9rem;display:none;animation:fadeUp .3s ease;}
+  .toast.show{display:block;}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+
+  /* MOBILE */
+  @media(max-width:768px){
+    .sidebar{width:100%;height:auto;position:relative;flex-direction:row;flex-wrap:wrap;padding:1rem;}
+    .sidebar-nav{flex-direction:row;flex-wrap:wrap;}
+    .main{margin-left:0;padding:1.5rem;}
+    .form-row{grid-template-columns:1fr;}
+    .stats-row{grid-template-columns:1fr 1fr;}
+  }
+</style>
+</head>
+<body>
+
+<div class="sidebar">
+  <div>
+    <div class="sidebar-logo">Campus<span>Hub</span></div>
+    <div class="sidebar-sub">Admin Panel</div>
+  </div>
+  <nav class="sidebar-nav">
+    <button class="nav-item active" onclick="showPage('dashboard')"><span class="nav-icon">🏠</span> Dashboard</button>
+    <button class="nav-item" onclick="showPage('clubs')"><span class="nav-icon">🏛️</span> Manage Clubs</button>
+    <button class="nav-item" onclick="showPage('events')"><span class="nav-icon">📅</span> Manage Events</button>
+    <button class="nav-item" onclick="showPage('recruitments')"><span class="nav-icon">📋</span> Recruitments</button>
+    <button class="nav-item" onclick="showPage('announcements')"><span class="nav-icon">📢</span> Announcements</button>
+  </nav>
+  <div class="sidebar-footer">
+    <a href="index.html" class="back-link">← Back to Website</a>
+  </div>
+</div>
+
+<div class="main">
+
+  <!-- DASHBOARD -->
+  <div class="page active" id="page-dashboard">
+    <div class="page-header">
+      <div class="page-title">Welcome, Admin 👋</div>
+      <div class="page-desc">Here's a live overview of your CampusHub</div>
+    </div>
+    <div class="stats-row">
+      <div class="stat-card"><div class="stat-card-num" id="dash-clubs">—</div><div class="stat-card-label">Total Clubs</div></div>
+      <div class="stat-card"><div class="stat-card-num" id="dash-events">—</div><div class="stat-card-label">Upcoming Events</div></div>
+      <div class="stat-card"><div class="stat-card-num" id="dash-recruits">—</div><div class="stat-card-label">Open Recruitments</div></div>
+      <div class="stat-card"><div class="stat-card-num" id="dash-announcements">—</div><div class="stat-card-label">Announcements</div></div>
+    </div>
+    <div class="form-card" style="background:linear-gradient(135deg,#6c63ff18,#ff658418);border-color:#6c63ff33;">
+      <h3>🚀 Quick Actions</h3>
+      <div style="display:flex;gap:.75rem;flex-wrap:wrap;">
+        <button class="btn-submit" onclick="showPage('clubs')">+ Add Club</button>
+        <button class="btn-submit" style="background:var(--accent2);" onclick="showPage('events')">+ Add Event</button>
+        <button class="btn-submit" style="background:#8b5cf6;" onclick="showPage('recruitments')">+ Post Recruitment</button>
+        <button class="btn-submit" style="background:var(--accent3);color:#000;" onclick="showPage('announcements')">+ Announcement</button>
+      </div>
+    </div>
+    <div class="data-card">
+      <div class="data-card-header"><div class="data-card-title">📢 Recent Announcements</div></div>
+      <table class="data-table">
+        <thead><tr><th>Club</th><th>Message</th><th>Time</th></tr></thead>
+        <tbody id="dash-feed-table"><tr class="empty-row"><td colspan="3">Loading...</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- CLUBS -->
+  <div class="page" id="page-clubs">
+    <div class="page-header">
+      <div class="page-title">🏛️ Manage Clubs</div>
+      <div class="page-desc">Add and manage all clubs and societies</div>
+    </div>
+    <div class="form-card">
+      <h3>➕ Add New Club</h3>
+      <div class="form-row">
+        <div class="form-group"><label>Club Name *</label><input type="text" id="club-name" placeholder="e.g. Coding Club"/></div>
+        <div class="form-group"><label>Emoji / Icon</label><input type="text" id="club-emoji" placeholder="e.g. 💻" maxlength="4"/></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Category *</label>
+          <select id="club-category">
+            <option value="">Select category</option>
+            <option>Technology</option><option>Arts & Culture</option>
+            <option>Music</option><option>Sports</option>
+            <option>Social</option><option>Academic</option><option>Other</option>
+          </select>
+        </div>
+        <div class="form-group"><label>Members Count</label><input type="number" id="club-members" placeholder="e.g. 120"/></div>
+      </div>
+      <div class="form-group"><label>Description</label><textarea id="club-desc" rows="3" placeholder="What does your club do? What events do you organize?"></textarea></div>
+      <button class="btn-submit" onclick="addClub()">Add Club →</button>
+    </div>
+    <div class="data-card">
+      <div class="data-card-header"><div class="data-card-title">All Clubs</div></div>
+      <table class="data-table">
+        <thead><tr><th>Club</th><th>Category</th><th>Members</th><th>Action</th></tr></thead>
+        <tbody id="clubs-table"><tr class="empty-row"><td colspan="4">Loading...</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- EVENTS -->
+  <div class="page" id="page-events">
+    <div class="page-header">
+      <div class="page-title">📅 Manage Events</div>
+      <div class="page-desc">Post upcoming events for students</div>
+    </div>
+    <div class="form-card">
+      <h3>➕ Add New Event</h3>
+      <div class="form-row">
+        <div class="form-group"><label>Event Title *</label><input type="text" id="event-title" placeholder="e.g. Annual Hackathon 2025"/></div>
+        <div class="form-group"><label>Club Name *</label><input type="text" id="event-club" placeholder="e.g. Coding Club"/></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Event Date *</label><input type="date" id="event-date"/></div>
+        <div class="form-group"><label>Tags (comma separated)</label><input type="text" id="event-tags" placeholder="e.g. Free Entry, Certificate, Team Event"/></div>
+      </div>
+      <div class="form-group"><label>Description</label><textarea id="event-desc" rows="3" placeholder="Tell students what this event is about, venue, timings..."></textarea></div>
+      <button class="btn-submit" onclick="addEvent()">Post Event →</button>
+    </div>
+    <div class="data-card">
+      <div class="data-card-header"><div class="data-card-title">All Events</div></div>
+      <table class="data-table">
+        <thead><tr><th>Event</th><th>Club</th><th>Date</th><th>Action</th></tr></thead>
+        <tbody id="events-table"><tr class="empty-row"><td colspan="4">Loading...</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- RECRUITMENTS -->
+  <div class="page" id="page-recruitments">
+    <div class="page-header">
+      <div class="page-title">📋 Recruitments</div>
+      <div class="page-desc">Post open roles for your club</div>
+    </div>
+    <div class="form-card">
+      <h3>➕ Post New Recruitment</h3>
+      <div class="form-row">
+        <div class="form-group"><label>Role Title *</label><input type="text" id="recruit-role" placeholder="e.g. Core Team Member"/></div>
+        <div class="form-group"><label>Club Name *</label><input type="text" id="recruit-club" placeholder="e.g. Coding Club"/></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Category</label>
+          <select id="recruit-category">
+            <option value="">Select type</option>
+            <option>Technical</option><option>Creative</option>
+            <option>Management</option><option>Performance</option>
+            <option>Research</option><option>Social Work</option><option>Other</option>
+          </select>
+        </div>
+        <div class="form-group"><label>Hours per Week</label><input type="number" id="recruit-hours" placeholder="e.g. 5"/></div>
+      </div>
+      <div class="form-group"><label>Application Deadline</label><input type="date" id="recruit-deadline"/></div>
+      <button class="btn-submit" onclick="addRecruitment()">Post Recruitment →</button>
+    </div>
+    <div class="data-card">
+      <div class="data-card-header"><div class="data-card-title">All Recruitments</div></div>
+      <table class="data-table">
+        <thead><tr><th>Role</th><th>Club</th><th>Deadline</th><th>Status</th><th>Action</th></tr></thead>
+        <tbody id="recruit-table"><tr class="empty-row"><td colspan="5">Loading...</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ANNOUNCEMENTS -->
+  <div class="page" id="page-announcements">
+    <div class="page-header">
+      <div class="page-title">📢 Announcements</div>
+      <div class="page-desc">Push updates to the live ticker and feed</div>
+    </div>
+    <div class="form-card">
+      <h3>➕ Post Announcement</h3>
+      <div class="form-group"><label>Club Name *</label><input type="text" id="ann-club" placeholder="e.g. Coding Club"/></div>
+      <div class="form-group"><label>Message *</label><textarea id="ann-message" rows="3" placeholder="e.g. Hackathon registrations are now open! Apply before slots fill up."></textarea></div>
+      <button class="btn-submit" onclick="addAnnouncement()">Post Announcement →</button>
+    </div>
+    <div class="data-card">
+      <div class="data-card-header"><div class="data-card-title">All Announcements</div></div>
+      <table class="data-table">
+        <thead><tr><th>Club</th><th>Message</th><th>Posted</th><th>Action</th></tr></thead>
+        <tbody id="ann-table"><tr class="empty-row"><td colspan="4">Loading...</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const SUPABASE_URL = 'https://obnfjycughgdhfcwoyrf.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9ibmZqeWN1Z2hnZGhmY3dveXJmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk5NjU1OTEsImV4cCI6MjA5NTU0MTU5MX0.oZxSChlq-MLq7c4XUG0VRaS99z-6zj_tlou_G4qyUsQ';
+const { createClient } = supabase;
+const db = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3500);
+}
+
+function showPage(name) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('page-'+name).classList.add('active');
+  event.currentTarget.classList.add('active');
+  if(name === 'clubs') loadClubsTable();
+  if(name === 'events') loadEventsTable();
+  if(name === 'recruitments') loadRecruitmentsTable();
+  if(name === 'announcements') loadAnnouncementsTable();
+  if(name === 'dashboard') loadDashboard();
+}
+
+function timeAgo(dateStr) {
+  const diff = Date.now() - new Date(dateStr);
+  const mins = Math.floor(diff/60000);
+  if(mins < 60) return mins + 'm ago';
+  const hrs = Math.floor(mins/60);
+  if(hrs < 24) return hrs + 'h ago';
+  return Math.floor(hrs/24) + 'd ago';
+}
+
+// DASHBOARD
+async function loadDashboard() {
+  const [clubs, events, recruits, ann] = await Promise.all([
+    db.from('clubs').select('id', {count:'exact'}),
+    db.from('events').select('id', {count:'exact'}).gte('event_date', new Date().toISOString().split('T')[0]),
+    db.from('recruitments').select('id', {count:'exact'}).eq('is_open', true),
+    db.from('announcements').select('*').order('created_at',{ascending:false}).limit(5)
+  ]);
+  document.getElementById('dash-clubs').textContent = clubs.count ?? 0;
+  document.getElementById('dash-events').textContent = events.count ?? 0;
+  document.getElementById('dash-recruits').textContent = recruits.count ?? 0;
+  document.getElementById('dash-announcements').textContent = ann.data?.length ?? 0;
+
+  const tbody = document.getElementById('dash-feed-table');
+  if(!ann.data || ann.data.length === 0) {
+    tbody.innerHTML = '<tr class="empty-row"><td colspan="3">No announcements yet.</td></tr>';
+    return;
+  }
+  tbody.innerHTML = ann.data.map(a => `
+    <tr>
+      <td><span class="badge badge-purple">${a.club_name||'Campus'}</span></td>
+      <td>${a.message}</td>
+      <td>${timeAgo(a.created_at)}</td>
+    </tr>
+  `).join('');
+}
+
+// ─── CLUBS ───
+async function addClub() {
+  const name = document.getElementById('club-name').value.trim();
+  const emoji = document.getElementById('club-emoji').value.trim();
+  const category = document.getElementById('club-category').value;
+  const members = parseInt(document.getElementById('club-members').value) || 0;
+  const description = document.getElementById('club-desc').value.trim();
+  if(!name || !category) { showToast('⚠️ Club name and category are required'); return; }
+  const btn = event.currentTarget;
+  btn.disabled = true; btn.textContent = 'Adding...';
+  const { error } = await db.from('clubs').insert([{ name, emoji, category, members, description }]);
+  btn.disabled = false; btn.textContent = 'Add Club →';
+  if(error) { showToast('❌ Error: ' + error.message); return; }
+  showToast('✅ Club added successfully!');
+  document.getElementById('club-name').value='';
+  document.getElementById('club-emoji').value='';
+  document.getElementById('club-members').value='';
+  document.getElementById('club-desc').value='';
+  document.getElementById('club-category').value='';
+  loadClubsTable();
+}
+
+async function loadClubsTable() {
+  const { data } = await db.from('clubs').select('*').order('created_at',{ascending:false});
+  const tbody = document.getElementById('clubs-table');
+  if(!data || data.length === 0) {
+    tbody.innerHTML = '<tr class="empty-row"><td colspan="4">No clubs yet. Add your first one above!</td></tr>';
+    return;
+  }
+  tbody.innerHTML = data.map(c => `
+    <tr>
+      <td><strong>${c.emoji||'🎯'} ${c.name}</strong></td>
+      <td><span class="badge badge-purple">${c.category||'—'}</span></td>
+      <td>${c.members||0}</td>
+      <td><button class="btn-delete" onclick="deleteRow('clubs','${c.id}',loadClubsTable)">Delete</button></td>
+    </tr>
+  `).join('');
+}
+
+// ─── EVENTS ───
+async function addEvent() {
+  const title = document.getElementById('event-title').value.trim();
+  const club_name = document.getElementById('event-club').value.trim();
+  const event_date = document.getElementById('event-date').value;
+  const tags = document.getElementById('event-tags').value.trim();
+  const description = document.getElementById('event-desc').value.trim();
+  if(!title || !club_name || !event_date) { showToast('⚠️ Title, club name and date are required'); return; }
+  const btn = event.currentTarget;
+  btn.disabled = true; btn.textContent = 'Posting...';
+  const { error } = await db.from('events').insert([{ title, club_name, event_date, tags, description }]);
+  btn.disabled = false; btn.textContent = 'Post Event →';
+  if(error) { showToast('❌ Error: ' + error.message); return; }
+  showToast('✅ Event posted successfully!');
+  document.getElementById('event-title').value='';
+  document.getElementById('event-club').value='';
+  document.getElementById('event-date').value='';
+  document.getElementById('event-tags').value='';
+  document.getElementById('event-desc').value='';
+  loadEventsTable();
+}
+
+async function loadEventsTable() {
+  const { data } = await db.from('events').select('*').order('event_date',{ascending:true});
+  const tbody = document.getElementById('events-table');
+  if(!data || data.length === 0) {
+    tbody.innerHTML = '<tr class="empty-row"><td colspan="4">No events yet.</td></tr>';
+    return;
+  }
+  tbody.innerHTML = data.map(e => `
+    <tr>
+      <td><strong>${e.title}</strong></td>
+      <td>${e.club_name||'—'}</td>
+      <td>${e.event_date ? new Date(e.event_date).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'}) : '—'}</td>
+      <td><button class="btn-delete" onclick="deleteRow('events','${e.id}',loadEventsTable)">Delete</button></td>
+    </tr>
+  `).join('');
+}
+
+// ─── RECRUITMENTS ───
+async function addRecruitment() {
+  const role = document.getElementById('recruit-role').value.trim();
+  const club_name = document.getElementById('recruit-club').value.trim();
+  const category = document.getElementById('recruit-category').value;
+  const hours_per_week = document.getElementById('recruit-hours').value.trim();
+  const deadline = document.getElementById('recruit-deadline').value;
+  if(!role || !club_name) { showToast('⚠️ Role and club name are required'); return; }
+  const btn = event.currentTarget;
+  btn.disabled = true; btn.textContent = 'Posting...';
+  const { error } = await db.from('recruitments').insert([{ role, club_name, category, hours_per_week, deadline, is_open: true }]);
+  btn.disabled = false; btn.textContent = 'Post Recruitment →';
+  if(error) { showToast('❌ Error: ' + error.message); return; }
+  showToast('✅ Recruitment posted!');
+  document.getElementById('recruit-role').value='';
+  document.getElementById('recruit-club').value='';
+  document.getElementById('recruit-hours').value='';
+  document.getElementById('recruit-deadline').value='';
+  document.getElementById('recruit-category').value='';
+  loadRecruitmentsTable();
+}
+
+async function loadRecruitmentsTable() {
+  const { data } = await db.from('recruitments').select('*').order('created_at',{ascending:false});
+  const tbody = document.getElementById('recruit-table');
+  if(!data || data.length === 0) {
+    tbody.innerHTML = '<tr class="empty-row"><td colspan="5">No recruitments yet.</td></tr>';
+    return;
+  }
+  tbody.innerHTML = data.map(r => `
+    <tr>
+      <td><strong>${r.role}</strong></td>
+      <td>${r.club_name||'—'}</td>
+      <td>${r.deadline ? new Date(r.deadline).toLocaleDateString('en-IN',{day:'numeric',month:'short'}) : 'Open'}</td>
+      <td><span class="badge ${r.is_open ? 'badge-green' : 'badge-red'}">${r.is_open ? 'Open' : 'Closed'}</span></td>
+      <td style="display:flex;gap:.4rem;flex-wrap:wrap;">
+        <button class="btn-toggle" onclick="toggleRecruitment('${r.id}', ${r.is_open})">${r.is_open ? 'Close' : 'Reopen'}</button>
+        <button class="btn-delete" onclick="deleteRow('recruitments','${r.id}',loadRecruitmentsTable)">Delete</button>
+      </td>
+    </tr>
+  `).join('');
+}
+
+async function toggleRecruitment(id, currentState) {
+  await db.from('recruitments').update({ is_open: !currentState }).eq('id', id);
+  showToast(currentState ? '🔒 Recruitment closed' : '🔓 Recruitment reopened');
+  loadRecruitmentsTable();
+}
+
+// ─── ANNOUNCEMENTS ───
+async function addAnnouncement() {
+  const club_name = document.getElementById('ann-club').value.trim();
+  const message = document.getElementById('ann-message').value.trim();
+  if(!club_name || !message) { showToast('⚠️ Club name and message are required'); return; }
+  const btn = event.currentTarget;
+  btn.disabled = true; btn.textContent = 'Posting...';
+  const { error } = await db.from('announcements').insert([{ club_name, message }]);
+  btn.disabled = false; btn.textContent = 'Post Announcement →';
+  if(error) { showToast('❌ Error: ' + error.message); return; }
+  showToast('✅ Announcement posted! It\'s now live on the website.');
+  document.getElementById('ann-club').value='';
+  document.getElementById('ann-message').value='';
+  loadAnnouncementsTable();
+}
+
+async function loadAnnouncementsTable() {
+  const { data } = await db.from('announcements').select('*').order('created_at',{ascending:false});
+  const tbody = document.getElementById('ann-table');
+  if(!data || data.length === 0) {
+    tbody.innerHTML = '<tr class="empty-row"><td colspan="4">No announcements yet.</td></tr>';
+    return;
+  }
+  tbody.innerHTML = data.map(a => `
+    <tr>
+      <td><span class="badge badge-purple">${a.club_name||'Campus'}</span></td>
+      <td>${a.message}</td>
+      <td>${timeAgo(a.created_at)}</td>
+      <td><button class="btn-delete" onclick="deleteRow('announcements','${a.id}',loadAnnouncementsTable)">Delete</button></td>
+    </tr>
+  `).join('');
+}
+
+// ─── GENERIC DELETE ───
+async function deleteRow(table, id, reloadFn) {
+  if(!confirm('Delete this item? This cannot be undone.')) return;
+  const { error } = await db.from(table).delete().eq('id', id);
+  if(error) { showToast('❌ Error: ' + error.message); return; }
+  showToast('🗑️ Deleted successfully');
+  reloadFn();
+  loadDashboard();
+}
+
+// INIT
+loadDashboard();
+</script>
+</body>
+</html>

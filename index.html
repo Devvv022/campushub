@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>CampusHub — All Clubs. One Place.</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap" rel="stylesheet"/>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  :root {
+    --bg:#0a0a0f; --surface:#12121a; --surface2:#1a1a26;
+    --border:#ffffff0f; --accent:#6c63ff; --accent2:#ff6584;
+    --accent3:#43e8b0; --text:#f0f0f8; --muted:#7a7a9a; --card:#15151f;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min-height:100vh;overflow-x:hidden;}
+
+  nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:1.1rem 3rem;background:rgba(10,10,15,0.85);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);}
+  .nav-logo{font-family:'Syne',sans-serif;font-weight:800;font-size:1.4rem;letter-spacing:-0.03em;}
+  .nav-logo span{color:var(--accent);}
+  .nav-links{display:flex;gap:2rem;}
+  .nav-links a{color:var(--muted);text-decoration:none;font-size:.9rem;font-weight:500;transition:color .2s;}
+  .nav-links a:hover{color:var(--text);}
+  .nav-right{display:flex;gap:.75rem;align-items:center;}
+  .nav-cta{background:var(--accent);color:#fff;border:none;padding:.55rem 1.3rem;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:.9rem;font-weight:500;cursor:pointer;transition:opacity .2s;}
+  .nav-cta:hover{opacity:.85;}
+  .admin-link{color:var(--muted);text-decoration:none;font-size:.85rem;border:1px solid var(--border);padding:.45rem 1rem;border-radius:8px;transition:.2s;}
+  .admin-link:hover{border-color:var(--accent);color:var(--accent);}
+
+  .ticker{background:linear-gradient(90deg,#6c63ff15,#ff658415);border-bottom:1px solid var(--border);padding:.6rem 3rem;display:flex;align-items:center;gap:1rem;overflow:hidden;margin-top:64px;}
+  .ticker-label{background:var(--accent);color:#fff;font-size:.7rem;font-weight:700;padding:.2rem .6rem;border-radius:5px;letter-spacing:.1em;text-transform:uppercase;flex-shrink:0;}
+  .ticker-wrap{overflow:hidden;flex:1;}
+  .ticker-track{display:flex;gap:3rem;animation:scroll 30s linear infinite;white-space:nowrap;font-size:.85rem;color:var(--muted);}
+  .ticker-track span{color:var(--text);}
+  @keyframes scroll{from{transform:translateX(0);}to{transform:translateX(-50%);}}
+
+  .hero{min-height:90vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:6rem 2rem 4rem;position:relative;}
+  .hero-glow{position:absolute;top:30%;left:50%;transform:translate(-50%,-50%);width:700px;height:400px;background:radial-gradient(ellipse,#6c63ff1a 0%,transparent 70%);pointer-events:none;}
+  .hero-badge{display:inline-flex;align-items:center;gap:.5rem;background:var(--surface);border:1px solid var(--border);border-radius:999px;padding:.4rem 1rem;font-size:.8rem;color:var(--muted);margin-bottom:2rem;animation:fadeUp .6s ease both;}
+  .badge-dot{width:7px;height:7px;background:var(--accent3);border-radius:50%;animation:pulse 2s infinite;}
+  @keyframes pulse{0%,100%{opacity:1;transform:scale(1);}50%{opacity:.5;transform:scale(1.5);}}
+  h1{font-family:'Syne',sans-serif;font-size:clamp(2.8rem,7vw,5.5rem);font-weight:800;line-height:1.05;letter-spacing:-0.04em;animation:fadeUp .7s .1s ease both;max-width:900px;}
+  h1 em{font-style:normal;color:var(--accent);}
+  .hero-sub{margin-top:1.5rem;color:var(--muted);font-size:1.1rem;max-width:560px;line-height:1.7;animation:fadeUp .7s .2s ease both;}
+  .hero-actions{display:flex;gap:1rem;margin-top:2.5rem;animation:fadeUp .7s .3s ease both;flex-wrap:wrap;justify-content:center;}
+  .btn-primary{background:var(--accent);color:#fff;border:none;padding:.75rem 2rem;border-radius:10px;font-family:'DM Sans',sans-serif;font-size:1rem;font-weight:500;cursor:pointer;transition:transform .2s,box-shadow .2s;box-shadow:0 0 30px #6c63ff44;}
+  .btn-primary:hover{transform:translateY(-2px);box-shadow:0 0 50px #6c63ff66;}
+  .btn-ghost{background:transparent;color:var(--text);border:1px solid var(--border);padding:.75rem 2rem;border-radius:10px;font-family:'DM Sans',sans-serif;font-size:1rem;font-weight:500;cursor:pointer;transition:.2s;}
+  .btn-ghost:hover{border-color:#ffffff33;background:var(--surface);}
+  .hero-stats{display:flex;gap:3rem;margin-top:4rem;animation:fadeUp .7s .4s ease both;flex-wrap:wrap;justify-content:center;}
+  .stat{text-align:center;}
+  .stat-num{font-family:'Syne',sans-serif;font-size:2rem;font-weight:800;}
+  .stat-label{font-size:.8rem;color:var(--muted);margin-top:.25rem;}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(20px);}to{opacity:1;transform:translateY(0);}}
+
+  section{position:relative;z-index:1;padding:5rem 3rem;}
+  .section-label{font-size:.75rem;font-weight:600;letter-spacing:.15em;text-transform:uppercase;color:var(--accent);margin-bottom:1rem;}
+  .section-title{font-family:'Syne',sans-serif;font-size:clamp(1.8rem,4vw,2.8rem);font-weight:800;letter-spacing:-0.03em;max-width:600px;}
+  .section-head{margin-bottom:3rem;}
+
+  .search-section{background:var(--surface);border-top:1px solid var(--border);border-bottom:1px solid var(--border);padding:2rem 3rem;}
+  .search-wrap{max-width:1000px;margin:0 auto;display:flex;gap:1rem;flex-wrap:wrap;}
+  .search-input{flex:1;min-width:200px;background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:.8rem 1.2rem;color:var(--text);font-family:'DM Sans',sans-serif;font-size:1rem;outline:none;transition:border-color .2s;}
+  .search-input:focus{border-color:var(--accent);}
+  .filter-pills{display:flex;gap:.5rem;flex-wrap:wrap;align-items:center;}
+  .pill{background:var(--bg);border:1px solid var(--border);color:var(--muted);padding:.4rem 1rem;border-radius:999px;font-size:.82rem;cursor:pointer;transition:.2s;font-family:'DM Sans',sans-serif;}
+  .pill:hover,.pill.active{background:var(--accent);color:#fff;border-color:var(--accent);}
+
+  .clubs-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:1.5rem;max-width:1200px;margin:0 auto;}
+  .club-card{background:var(--card);border:1px solid var(--border);border-radius:16px;overflow:hidden;transition:transform .25s,border-color .25s,box-shadow .25s;}
+  .club-card:hover{transform:translateY(-4px);border-color:#6c63ff44;box-shadow:0 16px 60px #6c63ff18;}
+  .club-banner{height:80px;display:flex;align-items:center;justify-content:center;font-size:2.5rem;}
+  .club-body{padding:1.25rem;}
+  .club-top{display:flex;align-items:center;gap:.75rem;margin-bottom:.75rem;}
+  .club-avatar{width:44px;height:44px;border-radius:12px;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:1.4rem;background:var(--surface2);flex-shrink:0;}
+  .club-name{font-family:'Syne',sans-serif;font-weight:700;font-size:1rem;}
+  .club-category{font-size:.72rem;color:var(--muted);margin-top:.1rem;text-transform:uppercase;letter-spacing:.08em;}
+  .club-desc{font-size:.85rem;color:var(--muted);line-height:1.6;margin-bottom:1rem;}
+  .club-meta{display:flex;gap:1rem;font-size:.78rem;color:var(--muted);margin-bottom:1rem;}
+  .club-actions{display:flex;gap:.5rem;}
+  .btn-sm{flex:1;padding:.5rem;border-radius:8px;font-size:.82rem;font-family:'DM Sans',sans-serif;font-weight:500;cursor:pointer;transition:.2s;border:none;text-align:center;}
+  .btn-follow{background:var(--accent);color:#fff;}
+  .btn-follow:hover{opacity:.85;}
+  .btn-view{background:var(--surface2);color:var(--text);}
+  .btn-view:hover{background:#ffffff15;}
+
+  .events-section{background:var(--surface);border-top:1px solid var(--border);}
+  .events-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:1.25rem;max-width:1200px;margin:0 auto;}
+  .event-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:1.25rem;display:flex;gap:1rem;transition:.25s;}
+  .event-card:hover{border-color:#6c63ff44;transform:translateY(-2px);}
+  .event-date{min-width:52px;background:var(--surface2);border-radius:10px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:.5rem;text-align:center;}
+  .event-month{font-size:.65rem;text-transform:uppercase;color:var(--muted);letter-spacing:.1em;}
+  .event-day{font-family:'Syne',sans-serif;font-size:1.6rem;font-weight:800;line-height:1;color:var(--accent);}
+  .event-info{flex:1;}
+  .event-title{font-weight:600;font-size:.95rem;margin-bottom:.3rem;}
+  .event-club{font-size:.78rem;color:var(--accent);margin-bottom:.4rem;}
+  .event-desc{font-size:.8rem;color:var(--muted);margin-bottom:.5rem;line-height:1.5;}
+  .event-rsvp{background:transparent;border:1px solid var(--border);color:var(--muted);padding:.35rem .9rem;border-radius:7px;font-size:.78rem;cursor:pointer;font-family:'DM Sans',sans-serif;transition:.2s;}
+  .event-rsvp:hover{border-color:var(--accent3);color:var(--accent3);}
+
+  .recruit-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:1.25rem;max-width:1200px;margin:0 auto;}
+  .recruit-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:1.5rem;position:relative;overflow:hidden;transition:.25s;}
+  .recruit-card:hover{border-color:#ff658444;transform:translateY(-2px);}
+  .recruit-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--accent),var(--accent2));}
+  .recruit-open{display:inline-block;background:#43e8b022;color:var(--accent3);font-size:.7rem;font-weight:600;padding:.25rem .7rem;border-radius:999px;margin-bottom:1rem;letter-spacing:.05em;}
+  .recruit-title{font-family:'Syne',sans-serif;font-weight:700;font-size:1.05rem;margin-bottom:.3rem;}
+  .recruit-club{font-size:.82rem;color:var(--muted);margin-bottom:.75rem;}
+  .recruit-details{display:flex;gap:1.5rem;font-size:.78rem;color:var(--muted);margin-bottom:1rem;}
+  .recruit-deadline{font-size:.78rem;color:var(--accent2);margin-bottom:1rem;}
+  .btn-apply{width:100%;background:linear-gradient(135deg,var(--accent),#8b5cf6);color:#fff;border:none;padding:.65rem;border-radius:9px;font-family:'DM Sans',sans-serif;font-size:.88rem;font-weight:500;cursor:pointer;transition:.2s;}
+  .btn-apply:hover{opacity:.85;}
+
+  .feed-section{background:var(--surface);border-top:1px solid var(--border);}
+  .feed-inner{max-width:700px;margin:0 auto;}
+  .feed-item{display:flex;gap:1rem;padding:1.25rem 0;border-bottom:1px solid var(--border);}
+  .feed-icon{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0;background:var(--surface2);}
+  .feed-content{flex:1;}
+  .feed-title{font-weight:500;font-size:.92rem;margin-bottom:.2rem;}
+  .feed-meta{font-size:.78rem;color:var(--muted);}
+  .feed-meta strong{color:var(--accent);}
+
+  .empty-state{text-align:center;padding:3rem;color:var(--muted);grid-column:1/-1;}
+  .empty-state .empty-icon{font-size:3rem;margin-bottom:1rem;}
+  .loading{text-align:center;padding:3rem;color:var(--muted);grid-column:1/-1;}
+
+  footer{background:var(--surface);border-top:1px solid var(--border);padding:3rem;text-align:center;color:var(--muted);font-size:.85rem;position:relative;z-index:1;}
+  .foot-logo{font-family:'Syne',sans-serif;font-weight:800;font-size:1.3rem;margin-bottom:.5rem;}
+  .foot-logo span{color:var(--accent);}
+
+  .modal-overlay{display:none;position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.75);backdrop-filter:blur(8px);align-items:center;justify-content:center;padding:1rem;}
+  .modal-overlay.open{display:flex;}
+  .modal{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:2rem;max-width:480px;width:100%;animation:fadeUp .3s ease;max-height:90vh;overflow-y:auto;}
+  .modal h2{font-family:'Syne',sans-serif;font-weight:800;font-size:1.4rem;margin-bottom:1rem;}
+  .modal-close{float:right;background:none;border:none;color:var(--muted);font-size:1.4rem;cursor:pointer;margin-top:-.5rem;margin-right:-.5rem;}
+  .form-group{margin-bottom:1rem;}
+  .form-group label{display:block;font-size:.82rem;color:var(--muted);margin-bottom:.4rem;}
+  .form-group input,.form-group select,.form-group textarea{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:9px;padding:.7rem 1rem;color:var(--text);font-family:'DM Sans',sans-serif;font-size:.9rem;outline:none;transition:border-color .2s;}
+  .form-group input:focus,.form-group select:focus,.form-group textarea:focus{border-color:var(--accent);}
+  .form-group select option{background:var(--surface);}
+
+  .toast{position:fixed;bottom:2rem;right:2rem;background:var(--surface);border:1px solid var(--accent3);color:var(--text);padding:1rem 1.5rem;border-radius:12px;z-index:999;font-size:.9rem;animation:fadeUp .3s ease;display:none;}
+  .toast.show{display:block;}
+
+  @media(max-width:768px){
+    nav{padding:1rem 1.5rem;}
+    .nav-links{display:none;}
+    section{padding:4rem 1.5rem;}
+    .search-section{padding:1.5rem;}
+    .hero-stats{gap:1.5rem;}
+    .ticker{padding:.6rem 1.5rem;}
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-logo">Campus<span>Hub</span></div>
+  <div class="nav-links">
+    <a href="#clubs">Clubs</a>
+    <a href="#events">Events</a>
+    <a href="#recruitments">Recruitments</a>
+    <a href="#feed">Updates</a>
+  </div>
+  <div class="nav-right">
+    <a href="admin.html" class="admin-link">⚙️ Club Admin</a>
+  </div>
+</nav>
+
+<div class="ticker">
+  <span class="ticker-label">Live</span>
+  <div class="ticker-wrap">
+    <div class="ticker-track" id="tickerTrack">
+      <span>Loading announcements...</span>
+    </div>
+  </div>
+</div>
+
+<section class="hero">
+  <div class="hero-glow"></div>
+  <div class="hero-badge"><span class="badge-dot"></span><span id="heroBadge">Loading clubs...</span></div>
+  <h1>Every Club.<br>Every Event.<br><em>One Place.</em></h1>
+  <p class="hero-sub">Your college's unified platform for societies, clubs, events, recruitments, and announcements — so nothing ever goes unnoticed.</p>
+  <div class="hero-actions">
+    <button class="btn-primary" onclick="document.getElementById('clubs').scrollIntoView()">Explore Clubs</button>
+    <button class="btn-ghost" onclick="document.getElementById('events').scrollIntoView()">Upcoming Events →</button>
+  </div>
+  <div class="hero-stats">
+    <div class="stat"><div class="stat-num" id="statClubs">—</div><div class="stat-label">Active Clubs</div></div>
+    <div class="stat"><div class="stat-num" id="statEvents">—</div><div class="stat-label">Upcoming Events</div></div>
+    <div class="stat"><div class="stat-num" id="statRecruits">—</div><div class="stat-label">Open Recruitments</div></div>
+  </div>
+</section>
+
+<div class="search-section" id="clubs">
+  <div class="search-wrap">
+    <input class="search-input" type="text" placeholder="🔍  Search clubs, events, or recruitments..." oninput="filterClubs(this.value)"/>
+    <div class="filter-pills">
+      <button class="pill active" onclick="setFilter(this,'all')">All</button>
+      <button class="pill" onclick="setFilter(this,'Technology')">💻 Tech</button>
+      <button class="pill" onclick="setFilter(this,'Arts & Culture')">🎭 Arts</button>
+      <button class="pill" onclick="setFilter(this,'Sports')">🏅 Sports</button>
+      <button class="pill" onclick="setFilter(this,'Music')">🎵 Music</button>
+      <button class="pill" onclick="setFilter(this,'Social')">🤝 Social</button>
+    </div>
+  </div>
+</div>
+
+<section>
+  <div style="max-width:1200px;margin:0 auto;">
+    <div class="section-head">
+      <div class="section-label">Societies & Clubs</div>
+      <h2 class="section-title">Find your people on campus</h2>
+    </div>
+    <div class="clubs-grid" id="clubsGrid">
+      <div class="loading">⏳ Loading clubs...</div>
+    </div>
+  </div>
+</section>
+
+<section class="events-section" id="events">
+  <div style="max-width:1200px;margin:0 auto;">
+    <div class="section-head">
+      <div class="section-label">Upcoming Events</div>
+      <h2 class="section-title">What's happening on campus</h2>
+    </div>
+    <div class="events-grid" id="eventsGrid">
+      <div class="loading">⏳ Loading events...</div>
+    </div>
+  </div>
+</section>
+
+<section id="recruitments">
+  <div style="max-width:1200px;margin:0 auto;">
+    <div class="section-head">
+      <div class="section-label">Open Recruitments</div>
+      <h2 class="section-title">Apply & join a club today</h2>
+    </div>
+    <div class="recruit-grid" id="recruitGrid">
+      <div class="loading">⏳ Loading recruitments...</div>
+    </div>
+  </div>
+</section>
+
+<section class="feed-section" id="feed">
+  <div style="max-width:700px;margin:0 auto;">
+    <div class="section-head">
+      <div class="section-label">Latest Updates</div>
+      <h2 class="section-title">Campus announcement feed</h2>
+    </div>
+    <div class="feed-inner" id="feedInner">
+      <div class="loading">⏳ Loading announcements...</div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="foot-logo">Campus<span>Hub</span></div>
+  <p style="margin-top:.5rem;">Your college's unified club & events platform</p>
+  <p style="margin-top:1.5rem;font-size:.75rem;">Built with ❤️ for students, by students</p>
+</footer>
+
+<!-- Apply Modal -->
+<div class="modal-overlay" id="modal-apply">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('apply')">×</button>
+    <h2>Apply for Role 🚀</h2>
+    <p style="color:var(--muted);font-size:.88rem;margin-bottom:1.5rem;">Applying for: <strong id="applyRoleLabel" style="color:var(--accent)"></strong></p>
+    <div class="form-group"><label>Full Name</label><input type="text" id="applyName" placeholder="Your full name"/></div>
+    <div class="form-group"><label>Branch & Year</label>
+      <select id="applyBranch">
+        <option>CSE — 1st Year</option><option>CSE — 2nd Year</option><option>CSE — 3rd Year</option>
+        <option>ECE — 1st Year</option><option>ECE — 2nd Year</option>
+        <option>ME — 1st Year</option><option>ME — 2nd Year</option><option>Other</option>
+      </select>
+    </div>
+    <div class="form-group"><label>Why do you want to join?</label><textarea id="applyWhy" rows="4" placeholder="Tell the club why you're a great fit..."></textarea></div>
+    <div class="form-group"><label>Portfolio / Social link (optional)</label><input type="text" id="applyLink" placeholder="GitHub, Behance, Instagram..."/></div>
+    <button class="btn-primary" style="width:100%;margin-top:.5rem;" onclick="submitApply()">Submit Application</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const SUPABASE_URL = 'https://obnfjycughgdhfcwoyrf.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9ibmZqeWN1Z2hnZGhmY3dveXJmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk5NjU1OTEsImV4cCI6MjA5NTU0MTU5MX0.oZxSChlq-MLq7c4XUG0VRaS99z-6zj_tlou_G4qyUsQ';
+const { createClient } = supabase;
+const db = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+let allClubs = [];
+let currentFilter = 'all';
+let currentApplyRole = '';
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+function timeAgo(dateStr) {
+  const diff = Date.now() - new Date(dateStr);
+  const mins = Math.floor(diff/60000);
+  if(mins < 60) return mins + ' minutes ago';
+  const hrs = Math.floor(mins/60);
+  if(hrs < 24) return hrs + ' hours ago';
+  return Math.floor(hrs/24) + ' days ago';
+}
+
+function formatDate(dateStr) {
+  if(!dateStr) return '—';
+  const d = new Date(dateStr);
+  return { day: d.getDate(), month: d.toLocaleString('default',{month:'short'}) };
+}
+
+// LOAD CLUBS
+async function loadClubs() {
+  const { data, error } = await db.from('clubs').select('*').order('created_at', { ascending: false });
+  if(error || !data || data.length === 0) {
+    document.getElementById('clubsGrid').innerHTML = `<div class="empty-state"><div class="empty-icon">🏛️</div><p>No clubs yet. <a href="admin.html" style="color:var(--accent)">Add your first club →</a></p></div>`;
+    document.getElementById('statClubs').textContent = '0';
+    document.getElementById('heroBadge').textContent = 'Be the first to add clubs!';
+    return;
+  }
+  allClubs = data;
+  document.getElementById('statClubs').textContent = data.length;
+  document.getElementById('heroBadge').textContent = `${data.length} clubs · Live on campus`;
+  renderClubs(data);
+}
+
+function renderClubs(clubs) {
+  const grid = document.getElementById('clubsGrid');
+  if(!clubs.length) {
+    grid.innerHTML = `<div class="empty-state"><div class="empty-icon">🔍</div><p>No clubs found for this filter.</p></div>`;
+    return;
+  }
+  grid.innerHTML = clubs.map(c => `
+    <div class="club-card">
+      <div class="club-banner" style="background:linear-gradient(135deg,#1a1a30,#0a0a20);">${c.emoji||'🎯'}</div>
+      <div class="club-body">
+        <div class="club-top">
+          <div class="club-avatar">${c.emoji||'🎯'}</div>
+          <div>
+            <div class="club-name">${c.name}</div>
+            <div class="club-category">${c.category||'General'}</div>
+          </div>
+        </div>
+        <p class="club-desc">${c.description||'No description yet.'}</p>
+        <div class="club-meta">
+          <span>👥 ${c.members||0} members</span>
+        </div>
+        <div class="club-actions">
+          <button class="btn-sm btn-follow" onclick="this.textContent=this.textContent.includes('+')?'✓ Following':'+ Follow';this.style.background=this.textContent.includes('✓')?'var(--accent3)':'var(--accent)';this.style.color=this.textContent.includes('✓')?'#000':'#fff'">+ Follow</button>
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function filterClubs(val) {
+  const filtered = allClubs.filter(c =>
+    c.name.toLowerCase().includes(val.toLowerCase()) ||
+    (c.description||'').toLowerCase().includes(val.toLowerCase()) ||
+    (c.category||'').toLowerCase().includes(val.toLowerCase())
+  );
+  renderClubs(filtered);
+}
+
+function setFilter(btn, cat) {
+  document.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
+  btn.classList.add('active');
+  currentFilter = cat;
+  if(cat === 'all') renderClubs(allClubs);
+  else renderClubs(allClubs.filter(c => c.category === cat));
+}
+
+// LOAD EVENTS
+async function loadEvents() {
+  const today = new Date().toISOString().split('T')[0];
+  const { data, error } = await db.from('events').select('*').gte('event_date', today).order('event_date', { ascending: true });
+  if(error || !data || data.length === 0) {
+    document.getElementById('eventsGrid').innerHTML = `<div class="empty-state"><div class="empty-icon">📅</div><p>No upcoming events. <a href="admin.html" style="color:var(--accent)">Add an event →</a></p></div>`;
+    document.getElementById('statEvents').textContent = '0';
+    return;
+  }
+  document.getElementById('statEvents').textContent = data.length + '+';
+  document.getElementById('eventsGrid').innerHTML = data.map(e => {
+    const d = formatDate(e.event_date);
+    return `
+    <div class="event-card">
+      <div class="event-date">
+        <div class="event-month">${d.month}</div>
+        <div class="event-day">${d.day}</div>
+      </div>
+      <div class="event-info">
+        <div class="event-title">${e.title}</div>
+        <div class="event-club">${e.club_name||''}</div>
+        <div class="event-desc">${e.description||''}</div>
+        <button class="event-rsvp" onclick="this.textContent=this.textContent==='RSVP →'?'✓ Going!':'RSVP →';this.style.color=this.textContent==='✓ Going!'?'var(--accent3)':'';this.style.borderColor=this.textContent==='✓ Going!'?'var(--accent3)':''">RSVP →</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// LOAD RECRUITMENTS
+async function loadRecruitments() {
+  const { data, error } = await db.from('recruitments').select('*').eq('is_open', true).order('deadline', { ascending: true });
+  if(error || !data || data.length === 0) {
+    document.getElementById('recruitGrid').innerHTML = `<div class="empty-state"><div class="empty-icon">📋</div><p>No open recruitments. <a href="admin.html" style="color:var(--accent)">Post a recruitment →</a></p></div>`;
+    document.getElementById('statRecruits').textContent = '0';
+    return;
+  }
+  document.getElementById('statRecruits').textContent = data.length;
+  document.getElementById('recruitGrid').innerHTML = data.map(r => `
+    <div class="recruit-card">
+      <div class="recruit-open">● Open</div>
+      <div class="recruit-title">${r.role}</div>
+      <div class="recruit-club">${r.club_name||''}</div>
+      <div class="recruit-details">
+        <span>📌 ${r.category||'General'}</span>
+        <span>🕐 ${r.hours_per_week||'—'} hrs/week</span>
+      </div>
+      <div class="recruit-deadline">⏳ Deadline: ${r.deadline ? new Date(r.deadline).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'}) : 'Open'}</div>
+      <button class="btn-apply" onclick="openApply('${r.role} — ${r.club_name||''}')">Apply Now</button>
+    </div>
+  `).join('');
+}
+
+// LOAD ANNOUNCEMENTS
+async function loadAnnouncements() {
+  const { data, error } = await db.from('announcements').select('*').order('created_at', { ascending: false }).limit(10);
+  if(error || !data || data.length === 0) {
+    document.getElementById('feedInner').innerHTML = `<div class="empty-state"><div class="empty-icon">📢</div><p>No announcements yet. <a href="admin.html" style="color:var(--accent)">Post one →</a></p></div>`;
+    // ticker
+    document.getElementById('tickerTrack').innerHTML = '<span>Welcome to CampusHub!</span> No announcements yet — club heads, log in to post updates!';
+    return;
+  }
+  // Feed
+  document.getElementById('feedInner').innerHTML = data.map(a => `
+    <div class="feed-item">
+      <div class="feed-icon">📢</div>
+      <div class="feed-content">
+        <div class="feed-title">${a.message}</div>
+        <div class="feed-meta"><strong>${a.club_name||'Campus'}</strong> · ${timeAgo(a.created_at)}</div>
+      </div>
+    </div>
+  `).join('');
+  // Ticker
+  const tickerText = data.map(a => `<span>${a.club_name||'Campus'}</span> — ${a.message}`).join(' &nbsp;·&nbsp; ');
+  document.getElementById('tickerTrack').innerHTML = tickerText + ' &nbsp;·&nbsp; ' + tickerText;
+}
+
+// APPLY MODAL
+function openApply(role) {
+  currentApplyRole = role;
+  document.getElementById('applyRoleLabel').textContent = role;
+  document.getElementById('modal-apply').classList.add('open');
+}
+function closeModal(id) {
+  document.getElementById('modal-'+id).classList.remove('open');
+}
+document.querySelectorAll('.modal-overlay').forEach(el => {
+  el.addEventListener('click', e => { if(e.target===el) el.classList.remove('open'); });
+});
+
+async function submitApply() {
+  const name = document.getElementById('applyName').value.trim();
+  const branch = document.getElementById('applyBranch').value;
+  const why = document.getElementById('applyWhy').value.trim();
+  if(!name || !why) { showToast('⚠️ Please fill in all required fields'); return; }
+  closeModal('apply');
+  showToast('🎉 Application submitted! The club will reach out soon.');
+  document.getElementById('applyName').value='';
+  document.getElementById('applyWhy').value='';
+  document.getElementById('applyLink').value='';
+}
+
+// INIT
+async function init() {
+  await Promise.all([loadClubs(), loadEvents(), loadRecruitments(), loadAnnouncements()]);
+}
+init();
+</script>
+</body>
+</html>
