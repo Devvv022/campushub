@@ -142,6 +142,21 @@
   .toast{position:fixed;bottom:2rem;right:2rem;background:var(--surface);border:1px solid var(--accent3);color:var(--text);padding:1rem 1.5rem;border-radius:12px;z-index:999;font-size:.9rem;animation:fadeUp .3s ease;display:none;}
   .toast.show{display:block;}
 
+  .user-avatar{width:34px;height:34px;border-radius:50%;background:var(--accent);color:#fff;border:none;font-size:.85rem;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;}
+  .user-menu{position:relative;}
+  .user-dropdown{position:absolute;top:calc(100% + .5rem);right:0;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:.5rem;min-width:180px;display:none;z-index:200;box-shadow:0 8px 30px #00000066;}
+  .user-dropdown.open{display:block;}
+  .user-info{padding:.6rem .75rem;border-bottom:1px solid var(--border);margin-bottom:.25rem;}
+  .user-info-name{font-weight:600;font-size:.88rem;}
+  .user-info-email{font-size:.75rem;color:var(--muted);margin-top:.1rem;}
+  .dropdown-item{display:block;width:100%;text-align:left;background:none;border:none;color:var(--muted);padding:.6rem .75rem;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:.85rem;cursor:pointer;transition:.2s;}
+  .dropdown-item:hover{background:var(--surface2);color:var(--text);}
+  .dropdown-item.danger{color:#ff9eb5;}
+  .dropdown-item.danger:hover{background:#ff658422;}
+  .auth-tabs{display:flex;gap:.5rem;margin-bottom:1.5rem;}
+  .auth-tab{flex:1;padding:.6rem;border-radius:8px;border:1px solid var(--border);background:none;color:var(--muted);font-family:'DM Sans',sans-serif;font-size:.9rem;cursor:pointer;transition:.2s;}
+  .auth-tab.active{background:var(--accent);color:#fff;border-color:var(--accent);}
+
   @media(max-width:768px){
     nav{padding:1rem 1.5rem;}
     .nav-links{display:none;}
@@ -164,6 +179,9 @@
   </div>
   <div class="nav-right">
     <a href="admin.html" class="admin-link">⚙️ Club Admin</a>
+    <div class="user-menu" id="userMenu">
+      <button class="nav-cta" id="loginBtn" onclick="openAuthModal('login')">Sign In</button>
+    </div>
   </div>
 </nav>
 
@@ -259,6 +277,42 @@
   <p style="margin-top:.5rem;">Your college's unified club & events platform</p>
   <p style="margin-top:1.5rem;font-size:.75rem;">Built with ❤️ for students, by students</p>
 </footer>
+
+<!-- AUTH MODAL -->
+<div class="modal-overlay" id="modal-auth">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('auth')">×</button>
+    <h2 id="authTitle">Welcome 👋</h2>
+    <div class="auth-tabs">
+      <button class="auth-tab active" id="tab-login" onclick="switchAuthTab('login')">Sign In</button>
+      <button class="auth-tab" id="tab-register" onclick="switchAuthTab('register')">Register</button>
+    </div>
+    <!-- LOGIN FORM -->
+    <div id="loginForm">
+      <div class="form-group"><label>College Email</label><input type="email" id="loginEmail" placeholder="yourname@college.edu"/></div>
+      <div class="form-group"><label>Password</label><input type="password" id="loginPassword" placeholder="••••••••"/></div>
+      <button class="btn-primary" style="width:100%;margin-top:.5rem;" onclick="loginStudent()">Sign In →</button>
+      <p style="text-align:center;margin-top:1rem;font-size:.82rem;color:var(--muted);">New here? <span style="color:var(--accent);cursor:pointer;" onclick="switchAuthTab('register')">Create an account</span></p>
+    </div>
+    <!-- REGISTER FORM -->
+    <div id="registerForm" style="display:none;">
+      <div class="form-group"><label>Full Name *</label><input type="text" id="regName" placeholder="Your full name"/></div>
+      <div class="form-group"><label>College Email *</label><input type="email" id="regEmail" placeholder="yourname@college.edu"/></div>
+      <div class="form-group"><label>Branch & Year *</label>
+        <select id="regBranch">
+          <option value="">Select branch & year</option>
+          <option>CSE — 1st Year</option><option>CSE — 2nd Year</option><option>CSE — 3rd Year</option><option>CSE — 4th Year</option>
+          <option>ECE — 1st Year</option><option>ECE — 2nd Year</option><option>ECE — 3rd Year</option><option>ECE — 4th Year</option>
+          <option>ME — 1st Year</option><option>ME — 2nd Year</option><option>ME — 3rd Year</option><option>ME — 4th Year</option>
+          <option>Civil — 1st Year</option><option>Civil — 2nd Year</option><option>Other</option>
+        </select>
+      </div>
+      <div class="form-group"><label>Password *</label><input type="password" id="regPassword" placeholder="Min 6 characters"/></div>
+      <button class="btn-primary" style="width:100%;margin-top:.5rem;" onclick="registerStudent()">Create Account →</button>
+      <p style="text-align:center;margin-top:1rem;font-size:.82rem;color:var(--muted);">Already have an account? <span style="color:var(--accent);cursor:pointer;" onclick="switchAuthTab('login')">Sign in</span></p>
+    </div>
+  </div>
+</div>
 
 <!-- Apply Modal -->
 <div class="modal-overlay" id="modal-apply">
@@ -457,8 +511,16 @@ async function loadAnnouncements() {
 
 // APPLY MODAL
 function openApply(role) {
+  const user = getCurrentUser();
+  if(!user) {
+    showToast('⚠️ Please sign in first to apply!');
+    openAuthModal('login');
+    return;
+  }
   currentApplyRole = role;
   document.getElementById('applyRoleLabel').textContent = role;
+  // Pre-fill from logged in user
+  document.getElementById('applyName').value = user.name || '';
   document.getElementById('modal-apply').classList.add('open');
 }
 function closeModal(id) {
@@ -480,8 +542,105 @@ async function submitApply() {
   document.getElementById('applyLink').value='';
 }
 
+// ─── STUDENT AUTH ───
+function getCurrentUser() {
+  const u = sessionStorage.getItem('campushub_user');
+  return u ? JSON.parse(u) : null;
+}
+
+function updateNavForUser(user) {
+  const menu = document.getElementById('userMenu');
+  if(user) {
+    const initials = user.name.split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase();
+    menu.innerHTML = `
+      <button class="user-avatar" onclick="toggleUserDropdown()">${initials}</button>
+      <div class="user-dropdown" id="userDropdown">
+        <div class="user-info">
+          <div class="user-info-name">${user.name}</div>
+          <div class="user-info-email">${user.email}</div>
+          <div style="font-size:.72rem;color:var(--muted);margin-top:.2rem;">${user.branch||''}</div>
+        </div>
+        <button class="dropdown-item" onclick="closeUserDropdown()">👤 My Profile</button>
+        <button class="dropdown-item danger" onclick="logoutStudent()">🚪 Sign Out</button>
+      </div>`;
+  } else {
+    menu.innerHTML = `<button class="nav-cta" id="loginBtn" onclick="openAuthModal('login')">Sign In</button>`;
+  }
+}
+
+function toggleUserDropdown() {
+  document.getElementById('userDropdown')?.classList.toggle('open');
+}
+function closeUserDropdown() {
+  document.getElementById('userDropdown')?.classList.remove('open');
+}
+document.addEventListener('click', e => {
+  const menu = document.getElementById('userMenu');
+  if(menu && !menu.contains(e.target)) closeUserDropdown();
+});
+
+function openAuthModal(tab) {
+  document.getElementById('modal-auth').classList.add('open');
+  switchAuthTab(tab);
+}
+
+function switchAuthTab(tab) {
+  document.getElementById('loginForm').style.display = tab==='login' ? 'block' : 'none';
+  document.getElementById('registerForm').style.display = tab==='register' ? 'block' : 'none';
+  document.getElementById('tab-login').classList.toggle('active', tab==='login');
+  document.getElementById('tab-register').classList.toggle('active', tab==='register');
+  document.getElementById('authTitle').textContent = tab==='login' ? 'Welcome back 👋' : 'Create Account 🎓';
+}
+
+async function loginStudent() {
+  const email = document.getElementById('loginEmail').value.trim();
+  const password = document.getElementById('loginPassword').value;
+  if(!email || !password) { showToast('⚠️ Please fill in all fields'); return; }
+  const btn = document.querySelector('#loginForm .btn-primary');
+  btn.textContent = 'Signing in...'; btn.disabled = true;
+  const { data, error } = await db.from('students').select('*').eq('email', email).eq('password', password).single();
+  btn.textContent = 'Sign In →'; btn.disabled = false;
+  if(error || !data) { showToast('❌ Wrong email or password'); return; }
+  sessionStorage.setItem('campushub_user', JSON.stringify(data));
+  closeModal('auth');
+  updateNavForUser(data);
+  showToast(`🎉 Welcome back, ${data.name.split(' ')[0]}!`);
+}
+
+async function registerStudent() {
+  const name = document.getElementById('regName').value.trim();
+  const email = document.getElementById('regEmail').value.trim();
+  const branch = document.getElementById('regBranch').value;
+  const password = document.getElementById('regPassword').value;
+  if(!name || !email || !branch || !password) { showToast('⚠️ All fields are required'); return; }
+  if(password.length < 6) { showToast('⚠️ Password must be at least 6 characters'); return; }
+  if(!email.includes('@')) { showToast('⚠️ Please enter a valid email'); return; }
+  const btn = document.querySelector('#registerForm .btn-primary');
+  btn.textContent = 'Creating...'; btn.disabled = true;
+  // Check if email already exists
+  const { data: existing } = await db.from('students').select('id').eq('email', email).single();
+  if(existing) { btn.textContent = 'Create Account →'; btn.disabled = false; showToast('❌ This email is already registered'); return; }
+  const { data, error } = await db.from('students').insert([{ name, email, branch, password }]).select().single();
+  btn.textContent = 'Create Account →'; btn.disabled = false;
+  if(error) { showToast('❌ Error: ' + error.message); return; }
+  sessionStorage.setItem('campushub_user', JSON.stringify(data));
+  closeModal('auth');
+  updateNavForUser(data);
+  showToast(`🎉 Welcome to CampusHub, ${name.split(' ')[0]}!`);
+}
+
+function logoutStudent() {
+  sessionStorage.removeItem('campushub_user');
+  updateNavForUser(null);
+  closeUserDropdown();
+  showToast('👋 Signed out successfully');
+}
+
 // INIT
 async function init() {
+  // Restore session
+  const user = getCurrentUser();
+  if(user) updateNavForUser(user);
   await Promise.all([loadClubs(), loadEvents(), loadRecruitments(), loadAnnouncements()]);
 }
 init();

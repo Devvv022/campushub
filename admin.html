@@ -221,7 +221,7 @@
       <h3>➕ Add New Event</h3>
       <div class="form-row">
         <div class="form-group"><label>Event Title *</label><input type="text" id="event-title" placeholder="e.g. Annual Hackathon 2025"/></div>
-        <div class="form-group"><label>Club Name *</label><input type="text" id="event-club" placeholder="e.g. Coding Club"/></div>
+        <div class="form-group"><label>Club Name *</label><select id="event-club"><option value="">Loading clubs...</option></select></div>
       </div>
       <div class="form-row">
         <div class="form-group"><label>Event Date *</label><input type="date" id="event-date"/></div>
@@ -261,7 +261,7 @@
       <h3>➕ Post New Recruitment</h3>
       <div class="form-row">
         <div class="form-group"><label>Role Title *</label><input type="text" id="recruit-role" placeholder="e.g. Core Team Member"/></div>
-        <div class="form-group"><label>Club Name *</label><input type="text" id="recruit-club" placeholder="e.g. Coding Club"/></div>
+        <div class="form-group"><label>Club Name *</label><select id="recruit-club"><option value="">Loading clubs...</option></select></div>
       </div>
       <div class="form-row">
         <div class="form-group"><label>Category</label>
@@ -294,7 +294,7 @@
     </div>
     <div class="form-card">
       <h3>➕ Post Announcement</h3>
-      <div class="form-group"><label>Club Name *</label><input type="text" id="ann-club" placeholder="e.g. Coding Club"/></div>
+      <div class="form-group"><label>Club Name *</label><select id="ann-club"><option value="">Loading clubs...</option></select></div>
       <div class="form-group"><label>Message *</label><textarea id="ann-message" rows="3" placeholder="e.g. Hackathon registrations are now open!"></textarea></div>
       <div class="form-group">
         <label>Image / Poster (optional)</label>
@@ -361,9 +361,9 @@ function showPage(name,btn){
   document.getElementById('page-'+name).classList.add('active');
   if(btn) btn.classList.add('active');
   if(name==='clubs') loadClubsTable();
-  if(name==='events') loadEventsTable();
-  if(name==='recruitments') loadRecruitmentsTable();
-  if(name==='announcements') loadAnnouncementsTable();
+  if(name==='events'){ loadEventsTable(); loadClubDropdowns(); }
+  if(name==='recruitments'){ loadRecruitmentsTable(); loadClubDropdowns(); }
+  if(name==='announcements'){ loadAnnouncementsTable(); loadClubDropdowns(); }
   if(name==='dashboard') loadDashboard();
 }
 
@@ -415,6 +415,17 @@ function resetUpload(areaId, previewId, fileInputId, progressBarId, statusId) {
   if(bar){ bar.style.width='0%'; bar.parentElement.style.display='none'; }
   const status = document.getElementById(statusId);
   if(status) status.textContent='';
+}
+
+// ─── LOAD CLUBS INTO DROPDOWNS ───
+async function loadClubDropdowns() {
+  const { data } = await db.from('clubs').select('id,name,emoji').order('name', { ascending: true });
+  if(!data || data.length === 0) return;
+  const options = `<option value="">Select a club</option>` + data.map(c => `<option value="${c.name}">${c.emoji||'🎯'} ${c.name}</option>`).join('');
+  ['event-club','recruit-club','ann-club'].forEach(id => {
+    const el = document.getElementById(id);
+    if(el) el.innerHTML = options;
+  });
 }
 
 // ─── DASHBOARD ───
@@ -480,7 +491,7 @@ async function loadClubsTable(){
 // ─── EVENTS ───
 async function addEvent(){
   const title=document.getElementById('event-title').value.trim();
-  const club_name=document.getElementById('event-club').value.trim();
+  const club_name=document.getElementById('event-club').value;
   const event_date=document.getElementById('event-date').value;
   const tags=document.getElementById('event-tags').value.trim();
   const description=document.getElementById('event-desc').value.trim();
@@ -494,7 +505,8 @@ async function addEvent(){
   btn.disabled=false; btn.textContent='Post Event →';
   if(error){showToast('❌ Error: '+error.message);return;}
   showToast('✅ Event posted!');
-  ['event-title','event-club','event-date','event-tags','event-desc'].forEach(id=>document.getElementById(id).value='');
+  ['event-title','event-date','event-tags','event-desc'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('event-club').selectedIndex=0;
   resetUpload('event-poster-area','event-poster-preview','event-poster-file','event-poster-bar','event-poster-status');
   loadEventsTable();
 }
@@ -516,7 +528,7 @@ async function loadEventsTable(){
 // ─── RECRUITMENTS ───
 async function addRecruitment(){
   const role=document.getElementById('recruit-role').value.trim();
-  const club_name=document.getElementById('recruit-club').value.trim();
+  const club_name=document.getElementById('recruit-club').value;
   const category=document.getElementById('recruit-category').value;
   const hours_per_week=document.getElementById('recruit-hours').value.trim();
   const deadline=document.getElementById('recruit-deadline').value;
@@ -527,7 +539,8 @@ async function addRecruitment(){
   btn.disabled=false; btn.textContent='Post Recruitment →';
   if(error){showToast('❌ Error: '+error.message);return;}
   showToast('✅ Recruitment posted!');
-  ['recruit-role','recruit-club','recruit-hours','recruit-deadline'].forEach(id=>document.getElementById(id).value='');
+  ['recruit-role','recruit-hours','recruit-deadline'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('recruit-club').selectedIndex=0;
   document.getElementById('recruit-category').value='';
   loadRecruitmentsTable();
 }
@@ -557,7 +570,7 @@ async function toggleRecruitment(id,cur){
 
 // ─── ANNOUNCEMENTS ───
 async function addAnnouncement(){
-  const club_name=document.getElementById('ann-club').value.trim();
+  const club_name=document.getElementById('ann-club').value;
   const message=document.getElementById('ann-message').value.trim();
   const imgFile=document.getElementById('ann-image-file').files[0];
   if(!club_name||!message){showToast('⚠️ Club name and message are required');return;}
@@ -569,7 +582,7 @@ async function addAnnouncement(){
   btn.disabled=false; btn.textContent='Post Announcement →';
   if(error){showToast('❌ Error: '+error.message);return;}
   showToast('✅ Announcement live!');
-  document.getElementById('ann-club').value='';
+  document.getElementById('ann-club').selectedIndex=0;
   document.getElementById('ann-message').value='';
   resetUpload('ann-image-area','ann-image-preview','ann-image-file','ann-image-bar','ann-image-status');
   loadAnnouncementsTable();
