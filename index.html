@@ -4,215 +4,268 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>CampusHub — All Clubs. One Place.</title>
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Clash+Display:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
-  :root {
-    --bg:#0a0a0f; --surface:#12121a; --surface2:#1a1a26;
-    --border:#ffffff0f; --accent:#6c63ff; --accent2:#ff6584;
-    --accent3:#43e8b0; --text:#f0f0f8; --muted:#7a7a9a; --card:#15151f;
-  }
-  *{margin:0;padding:0;box-sizing:border-box;}
-  html{scroll-behavior:smooth;}
-  body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min-height:100vh;overflow-x:hidden;}
+:root {
+  --bg: #050508;
+  --surface: #0d0d14;
+  --surface2: #13131e;
+  --border: #ffffff08;
+  --border2: #ffffff14;
+  --accent: #f97316;
+  --accent2: #8b5cf6;
+  --accent3: #06b6d4;
+  --neon: #f97316;
+  --text: #f1f1f5;
+  --muted: #6b6b80;
+  --card: #0d0d14;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{background:var(--bg);color:var(--text);font-family:'Space Grotesk',sans-serif;min-height:100vh;overflow-x:hidden;}
 
-  nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:1.1rem 3rem;background:rgba(10,10,15,0.85);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);}
-  .nav-logo{font-family:'Syne',sans-serif;font-weight:800;font-size:1.4rem;letter-spacing:-0.03em;}
-  .nav-logo span{color:var(--accent);}
-  .nav-links{display:flex;gap:2rem;}
-  .nav-links a{color:var(--muted);text-decoration:none;font-size:.9rem;font-weight:500;transition:color .2s;}
-  .nav-links a:hover{color:var(--text);}
-  .nav-right{display:flex;gap:.75rem;align-items:center;}
-  .nav-cta{background:var(--accent);color:#fff;border:none;padding:.55rem 1.3rem;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:.9rem;font-weight:500;cursor:pointer;transition:opacity .2s;}
-  .nav-cta:hover{opacity:.85;}
-  .admin-link{color:var(--muted);text-decoration:none;font-size:.85rem;border:1px solid var(--border);padding:.45rem 1rem;border-radius:8px;transition:.2s;}
-  .admin-link:hover{border-color:var(--accent);color:var(--accent);}
+/* GRAIN OVERLAY */
+body::after{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");pointer-events:none;z-index:9998;opacity:.6;}
 
-  .ticker{background:linear-gradient(90deg,#6c63ff15,#ff658415);border-bottom:1px solid var(--border);padding:.6rem 3rem;display:flex;align-items:center;gap:1rem;overflow:hidden;margin-top:64px;}
-  .ticker-label{background:var(--accent);color:#fff;font-size:.7rem;font-weight:700;padding:.2rem .6rem;border-radius:5px;letter-spacing:.1em;text-transform:uppercase;flex-shrink:0;}
-  .ticker-wrap{overflow:hidden;flex:1;}
-  .ticker-track{display:flex;gap:3rem;animation:scroll 30s linear infinite;white-space:nowrap;font-size:.85rem;color:var(--muted);}
-  .ticker-track span{color:var(--text);}
-  @keyframes scroll{from{transform:translateX(0);}to{transform:translateX(-50%);}}
+/* ── NAV ── */
+nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:1rem 2.5rem;background:rgba(5,5,8,.9);backdrop-filter:blur(24px);border-bottom:1px solid var(--border2);}
+.nav-logo{display:flex;align-items:center;gap:.6rem;font-family:'Bebas Neue',sans-serif;font-size:1.7rem;letter-spacing:.05em;color:var(--text);}
+.nav-logo-dot{width:8px;height:8px;background:var(--accent);border-radius:50%;box-shadow:0 0 12px var(--accent);}
+.nav-links{display:flex;gap:2rem;}
+.nav-links a{color:var(--muted);text-decoration:none;font-size:.85rem;font-weight:500;letter-spacing:.03em;text-transform:uppercase;transition:.2s;position:relative;}
+.nav-links a::after{content:'';position:absolute;bottom:-4px;left:0;width:0;height:1px;background:var(--accent);transition:.3s;}
+.nav-links a:hover{color:var(--text);}
+.nav-links a:hover::after{width:100%;}
+.nav-right{display:flex;gap:.75rem;align-items:center;}
+.admin-link{color:var(--muted);text-decoration:none;font-size:.8rem;border:1px solid var(--border2);padding:.45rem 1rem;border-radius:6px;transition:.2s;letter-spacing:.03em;text-transform:uppercase;}
+.admin-link:hover{border-color:var(--accent);color:var(--accent);}
+.nav-cta{background:var(--accent);color:#000;border:none;padding:.5rem 1.25rem;border-radius:6px;font-family:'Space Grotesk',sans-serif;font-size:.85rem;font-weight:700;cursor:pointer;transition:.2s;letter-spacing:.03em;}
+.nav-cta:hover{opacity:.85;transform:translateY(-1px);}
+.user-avatar{width:34px;height:34px;border-radius:50%;background:var(--accent);color:#000;border:none;font-size:.8rem;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;font-family:'Space Grotesk',sans-serif;}
+.user-menu{position:relative;}
+.user-dropdown{position:absolute;top:calc(100% + .6rem);right:0;background:var(--surface);border:1px solid var(--border2);border-radius:12px;padding:.5rem;min-width:190px;display:none;z-index:200;box-shadow:0 12px 40px #00000099;}
+.user-dropdown.open{display:block;}
+.user-info{padding:.6rem .75rem;border-bottom:1px solid var(--border);margin-bottom:.25rem;}
+.user-info-name{font-weight:600;font-size:.88rem;}
+.user-info-email{font-size:.72rem;color:var(--muted);margin-top:.1rem;}
+.dropdown-item{display:block;width:100%;text-align:left;background:none;border:none;color:var(--muted);padding:.6rem .75rem;border-radius:8px;font-family:'Space Grotesk',sans-serif;font-size:.83rem;cursor:pointer;transition:.2s;}
+.dropdown-item:hover{background:var(--surface2);color:var(--text);}
+.dropdown-item.danger:hover{background:#ff657710;color:#ff9eb5;}
 
-  .hero{min-height:90vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:6rem 2rem 4rem;position:relative;}
-  .hero-glow{position:absolute;top:30%;left:50%;transform:translate(-50%,-50%);width:700px;height:400px;background:radial-gradient(ellipse,#6c63ff1a 0%,transparent 70%);pointer-events:none;}
-  .hero-badge{display:inline-flex;align-items:center;gap:.5rem;background:var(--surface);border:1px solid var(--border);border-radius:999px;padding:.4rem 1rem;font-size:.8rem;color:var(--muted);margin-bottom:2rem;animation:fadeUp .6s ease both;}
-  .badge-dot{width:7px;height:7px;background:var(--accent3);border-radius:50%;animation:pulse 2s infinite;}
-  @keyframes pulse{0%,100%{opacity:1;transform:scale(1);}50%{opacity:.5;transform:scale(1.5);}}
-  h1{font-family:'Syne',sans-serif;font-size:clamp(2.8rem,7vw,5.5rem);font-weight:800;line-height:1.05;letter-spacing:-0.04em;animation:fadeUp .7s .1s ease both;max-width:900px;}
-  h1 em{font-style:normal;color:var(--accent);}
-  .hero-sub{margin-top:1.5rem;color:var(--muted);font-size:1.1rem;max-width:560px;line-height:1.7;animation:fadeUp .7s .2s ease both;}
-  .hero-actions{display:flex;gap:1rem;margin-top:2.5rem;animation:fadeUp .7s .3s ease both;flex-wrap:wrap;justify-content:center;}
-  .btn-primary{background:var(--accent);color:#fff;border:none;padding:.75rem 2rem;border-radius:10px;font-family:'DM Sans',sans-serif;font-size:1rem;font-weight:500;cursor:pointer;transition:transform .2s,box-shadow .2s;box-shadow:0 0 30px #6c63ff44;}
-  .btn-primary:hover{transform:translateY(-2px);box-shadow:0 0 50px #6c63ff66;}
-  .btn-ghost{background:transparent;color:var(--text);border:1px solid var(--border);padding:.75rem 2rem;border-radius:10px;font-family:'DM Sans',sans-serif;font-size:1rem;font-weight:500;cursor:pointer;transition:.2s;}
-  .btn-ghost:hover{border-color:#ffffff33;background:var(--surface);}
-  .hero-stats{display:flex;gap:3rem;margin-top:4rem;animation:fadeUp .7s .4s ease both;flex-wrap:wrap;justify-content:center;}
-  .stat{text-align:center;}
-  .stat-num{font-family:'Syne',sans-serif;font-size:2rem;font-weight:800;}
-  .stat-label{font-size:.8rem;color:var(--muted);margin-top:.25rem;}
-  @keyframes fadeUp{from{opacity:0;transform:translateY(20px);}to{opacity:1;transform:translateY(0);}}
+/* ── TICKER ── */
+.ticker{background:var(--accent);margin-top:65px;padding:.5rem 2.5rem;display:flex;align-items:center;gap:1rem;overflow:hidden;}
+.ticker-label{background:#000;color:var(--accent);font-size:.65rem;font-weight:700;padding:.2rem .6rem;border-radius:4px;letter-spacing:.15em;text-transform:uppercase;flex-shrink:0;font-family:'Space Grotesk',sans-serif;}
+.ticker-wrap{overflow:hidden;flex:1;}
+.ticker-track{display:flex;gap:3rem;animation:scroll 30s linear infinite;white-space:nowrap;font-size:.82rem;color:#000;font-weight:500;}
+@keyframes scroll{from{transform:translateX(0);}to{transform:translateX(-50%);}}
 
-  section{position:relative;z-index:1;padding:5rem 3rem;}
-  .section-label{font-size:.75rem;font-weight:600;letter-spacing:.15em;text-transform:uppercase;color:var(--accent);margin-bottom:1rem;}
-  .section-title{font-family:'Syne',sans-serif;font-size:clamp(1.8rem,4vw,2.8rem);font-weight:800;letter-spacing:-0.03em;max-width:600px;}
-  .section-head{margin-bottom:3rem;}
+/* ── HERO ── */
+.hero{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:8rem 2rem 5rem;position:relative;overflow:hidden;}
+.hero-bg{position:absolute;inset:0;z-index:0;}
+.hero-img{width:100%;height:100%;object-fit:cover;opacity:.07;filter:saturate(0);}
+.hero-overlay{position:absolute;inset:0;background:radial-gradient(ellipse at 50% 60%, #f9731622 0%, transparent 65%), radial-gradient(ellipse at 20% 20%, #8b5cf618 0%, transparent 50%), linear-gradient(to bottom, var(--bg) 0%, transparent 30%, transparent 70%, var(--bg) 100%);}
+.hero-content{position:relative;z-index:1;}
+.hero-tag{display:inline-flex;align-items:center;gap:.5rem;border:1px solid var(--accent);border-radius:4px;padding:.3rem .9rem;font-size:.72rem;color:var(--accent);letter-spacing:.15em;text-transform:uppercase;margin-bottom:2rem;animation:fadeUp .6s ease both;}
+.hero-tag-dot{width:6px;height:6px;background:var(--accent);border-radius:50%;animation:pulse 2s infinite;box-shadow:0 0 8px var(--accent);}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:.3;}}
+.hero h1{font-family:'Bebas Neue',sans-serif;font-size:clamp(5rem,14vw,12rem);line-height:.9;letter-spacing:.02em;animation:fadeUp .7s .1s ease both;color:var(--text);}
+.hero h1 .outline{-webkit-text-stroke:2px var(--accent);color:transparent;}
+.hero h1 .small{font-size:clamp(2rem,5vw,4rem);letter-spacing:.1em;display:block;color:var(--muted);margin-bottom:.5rem;font-family:'Space Grotesk',sans-serif;font-weight:300;text-transform:uppercase;}
+.hero-sub{margin-top:2rem;color:var(--muted);font-size:1rem;max-width:480px;line-height:1.8;animation:fadeUp .7s .2s ease both;margin-left:auto;margin-right:auto;}
+.hero-actions{display:flex;gap:1rem;margin-top:2.5rem;animation:fadeUp .7s .3s ease both;flex-wrap:wrap;justify-content:center;}
+.btn-primary{background:var(--accent);color:#000;border:none;padding:.75rem 2rem;border-radius:6px;font-family:'Space Grotesk',sans-serif;font-size:.9rem;font-weight:700;cursor:pointer;transition:.2s;letter-spacing:.03em;text-transform:uppercase;}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 8px 30px #f9731644;}
+.btn-ghost{background:transparent;color:var(--text);border:1px solid var(--border2);padding:.75rem 2rem;border-radius:6px;font-family:'Space Grotesk',sans-serif;font-size:.9rem;font-weight:500;cursor:pointer;transition:.2s;letter-spacing:.03em;text-transform:uppercase;}
+.btn-ghost:hover{border-color:var(--text);}
+.hero-stats{display:flex;gap:0;margin-top:5rem;animation:fadeUp .7s .4s ease both;border:1px solid var(--border2);border-radius:12px;overflow:hidden;background:var(--surface);}
+.stat{text-align:center;padding:1.25rem 2.5rem;border-right:1px solid var(--border2);}
+.stat:last-child{border-right:none;}
+.stat-num{font-family:'Bebas Neue',sans-serif;font-size:2.5rem;color:var(--accent);line-height:1;}
+.stat-label{font-size:.72rem;color:var(--muted);margin-top:.25rem;text-transform:uppercase;letter-spacing:.1em;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(24px);}to{opacity:1;transform:translateY(0);}}
 
-  .search-section{background:var(--surface);border-top:1px solid var(--border);border-bottom:1px solid var(--border);padding:2rem 3rem;}
-  .search-wrap{max-width:1000px;margin:0 auto;display:flex;gap:1rem;flex-wrap:wrap;}
-  .search-input{flex:1;min-width:200px;background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:.8rem 1.2rem;color:var(--text);font-family:'DM Sans',sans-serif;font-size:1rem;outline:none;transition:border-color .2s;}
-  .search-input:focus{border-color:var(--accent);}
-  .filter-pills{display:flex;gap:.5rem;flex-wrap:wrap;align-items:center;}
-  .pill{background:var(--bg);border:1px solid var(--border);color:var(--muted);padding:.4rem 1rem;border-radius:999px;font-size:.82rem;cursor:pointer;transition:.2s;font-family:'DM Sans',sans-serif;}
-  .pill:hover,.pill.active{background:var(--accent);color:#fff;border-color:var(--accent);}
+/* ── SECTIONS ── */
+section{position:relative;z-index:1;padding:6rem 2.5rem;}
+.section-eyebrow{font-size:.7rem;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:var(--accent);margin-bottom:.75rem;display:flex;align-items:center;gap:.5rem;}
+.section-eyebrow::before{content:'';width:24px;height:1px;background:var(--accent);}
+.section-title{font-family:'Bebas Neue',sans-serif;font-size:clamp(2.5rem,6vw,5rem);line-height:.95;letter-spacing:.02em;max-width:700px;margin-bottom:3rem;}
+.section-title .dim{color:var(--muted);}
 
-  .clubs-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:1.5rem;max-width:1200px;margin:0 auto;}
-  .club-card{background:var(--card);border:1px solid var(--border);border-radius:16px;overflow:hidden;transition:transform .25s,border-color .25s,box-shadow .25s;}
-  .club-card:hover{transform:translateY(-4px);border-color:#6c63ff44;box-shadow:0 16px 60px #6c63ff18;}
-  .club-banner{height:80px;display:flex;align-items:center;justify-content:center;font-size:2.5rem;}
-  .club-body{padding:1.25rem;}
-  .club-top{display:flex;align-items:center;gap:.75rem;margin-bottom:.75rem;}
-  .club-avatar{width:44px;height:44px;border-radius:12px;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:1.4rem;background:var(--surface2);flex-shrink:0;}
-  .club-name{font-family:'Syne',sans-serif;font-weight:700;font-size:1rem;}
-  .club-category{font-size:.72rem;color:var(--muted);margin-top:.1rem;text-transform:uppercase;letter-spacing:.08em;}
-  .club-desc{font-size:.85rem;color:var(--muted);line-height:1.6;margin-bottom:1rem;}
-  .club-meta{display:flex;gap:1rem;font-size:.78rem;color:var(--muted);margin-bottom:1rem;}
-  .club-actions{display:flex;gap:.5rem;}
-  .btn-sm{flex:1;padding:.5rem;border-radius:8px;font-size:.82rem;font-family:'DM Sans',sans-serif;font-weight:500;cursor:pointer;transition:.2s;border:none;text-align:center;}
-  .btn-follow{background:var(--accent);color:#fff;}
-  .btn-follow:hover{opacity:.85;}
-  .btn-view{background:var(--surface2);color:var(--text);}
-  .btn-view:hover{background:#ffffff15;}
+/* ── SEARCH ── */
+.search-section{background:var(--surface);border-top:1px solid var(--border2);border-bottom:1px solid var(--border2);padding:1.5rem 2.5rem;}
+.search-wrap{max-width:1200px;margin:0 auto;display:flex;gap:1rem;flex-wrap:wrap;}
+.search-input{flex:1;min-width:220px;background:var(--bg);border:1px solid var(--border2);border-radius:8px;padding:.75rem 1.2rem;color:var(--text);font-family:'Space Grotesk',sans-serif;font-size:.9rem;outline:none;transition:.2s;}
+.search-input:focus{border-color:var(--accent);}
+.search-input::placeholder{color:var(--muted);}
+.filter-pills{display:flex;gap:.4rem;flex-wrap:wrap;align-items:center;}
+.pill{background:transparent;border:1px solid var(--border2);color:var(--muted);padding:.35rem .9rem;border-radius:4px;font-size:.75rem;cursor:pointer;transition:.2s;font-family:'Space Grotesk',sans-serif;letter-spacing:.05em;text-transform:uppercase;}
+.pill:hover,.pill.active{background:var(--accent);color:#000;border-color:var(--accent);font-weight:600;}
 
-  .events-section{background:var(--surface);border-top:1px solid var(--border);}
-  .events-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:1.25rem;max-width:1200px;margin:0 auto;}
-  .event-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:1.25rem;display:flex;gap:1rem;transition:.25s;}
-  .event-card:hover{border-color:#6c63ff44;transform:translateY(-2px);}
-  .event-date{min-width:52px;background:var(--surface2);border-radius:10px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:.5rem;text-align:center;}
-  .event-month{font-size:.65rem;text-transform:uppercase;color:var(--muted);letter-spacing:.1em;}
-  .event-day{font-family:'Syne',sans-serif;font-size:1.6rem;font-weight:800;line-height:1;color:var(--accent);}
-  .event-info{flex:1;}
-  .event-title{font-weight:600;font-size:.95rem;margin-bottom:.3rem;}
-  .event-club{font-size:.78rem;color:var(--accent);margin-bottom:.4rem;}
-  .event-desc{font-size:.8rem;color:var(--muted);margin-bottom:.5rem;line-height:1.5;}
-  .event-rsvp{background:transparent;border:1px solid var(--border);color:var(--muted);padding:.35rem .9rem;border-radius:7px;font-size:.78rem;cursor:pointer;font-family:'DM Sans',sans-serif;transition:.2s;}
-  .event-rsvp:hover{border-color:var(--accent3);color:var(--accent3);}
+/* ── CLUBS ── */
+.clubs-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:1px;max-width:1200px;margin:0 auto;border:1px solid var(--border2);border-radius:16px;overflow:hidden;background:var(--border2);}
+.club-card{background:var(--card);transition:.3s;cursor:pointer;position:relative;overflow:hidden;}
+.club-card::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,var(--accent)08,transparent);opacity:0;transition:.3s;}
+.club-card:hover::before{opacity:1;}
+.club-card:hover{background:var(--surface2);}
+.club-banner{height:100px;display:flex;align-items:center;justify-content:center;font-size:3rem;position:relative;overflow:hidden;background:linear-gradient(135deg,#0d0d14,#050508);}
+.club-banner-img{width:100%;height:100%;object-fit:cover;opacity:.5;}
+.club-body{padding:1.25rem;}
+.club-top{display:flex;align-items:center;gap:.75rem;margin-bottom:.75rem;}
+.club-avatar{width:42px;height:42px;border-radius:8px;border:1px solid var(--border2);display:flex;align-items:center;justify-content:center;font-size:1.3rem;background:var(--surface2);flex-shrink:0;overflow:hidden;}
+.club-name{font-weight:700;font-size:.95rem;letter-spacing:-.01em;}
+.club-category{font-size:.68rem;color:var(--accent);margin-top:.1rem;text-transform:uppercase;letter-spacing:.1em;font-weight:600;}
+.club-desc{font-size:.82rem;color:var(--muted);line-height:1.65;margin-bottom:1rem;}
+.club-meta{display:flex;gap:1rem;font-size:.75rem;color:var(--muted);margin-bottom:1rem;}
+.club-actions{display:flex;gap:.5rem;}
+.btn-sm{flex:1;padding:.45rem;border-radius:6px;font-size:.78rem;font-family:'Space Grotesk',sans-serif;font-weight:600;cursor:pointer;transition:.2s;border:none;letter-spacing:.03em;text-transform:uppercase;}
+.btn-follow{background:var(--accent);color:#000;}
+.btn-follow:hover{opacity:.85;}
+.btn-view{background:var(--surface2);color:var(--text);border:1px solid var(--border2);}
+.btn-view:hover{border-color:var(--text);}
 
-  .recruit-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:1.25rem;max-width:1200px;margin:0 auto;}
-  .recruit-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:1.5rem;position:relative;overflow:hidden;transition:.25s;}
-  .recruit-card:hover{border-color:#ff658444;transform:translateY(-2px);}
-  .recruit-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--accent),var(--accent2));}
-  .recruit-open{display:inline-block;background:#43e8b022;color:var(--accent3);font-size:.7rem;font-weight:600;padding:.25rem .7rem;border-radius:999px;margin-bottom:1rem;letter-spacing:.05em;}
-  .recruit-title{font-family:'Syne',sans-serif;font-weight:700;font-size:1.05rem;margin-bottom:.3rem;}
-  .recruit-club{font-size:.82rem;color:var(--muted);margin-bottom:.75rem;}
-  .recruit-details{display:flex;gap:1.5rem;font-size:.78rem;color:var(--muted);margin-bottom:1rem;}
-  .recruit-deadline{font-size:.78rem;color:var(--accent2);margin-bottom:1rem;}
-  .btn-apply{width:100%;background:linear-gradient(135deg,var(--accent),#8b5cf6);color:#fff;border:none;padding:.65rem;border-radius:9px;font-family:'DM Sans',sans-serif;font-size:.88rem;font-weight:500;cursor:pointer;transition:.2s;}
-  .btn-apply:hover{opacity:.85;}
+/* ── EVENTS ── */
+.events-wrap{background:var(--surface);border-top:1px solid var(--border2);}
+.events-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:1px;max-width:1200px;margin:0 auto;border:1px solid var(--border2);border-radius:16px;overflow:hidden;background:var(--border2);}
+.event-card{background:var(--card);padding:1.5rem;display:flex;gap:1rem;transition:.2s;position:relative;overflow:hidden;}
+.event-card:hover{background:var(--surface2);}
+.event-date-box{min-width:54px;background:var(--accent);border-radius:8px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:.6rem .4rem;text-align:center;flex-shrink:0;}
+.event-month{font-size:.6rem;text-transform:uppercase;color:#00000099;letter-spacing:.1em;font-weight:700;}
+.event-day{font-family:'Bebas Neue',sans-serif;font-size:2rem;color:#000;line-height:1;}
+.event-info{flex:1;}
+.event-title{font-weight:700;font-size:.95rem;margin-bottom:.25rem;letter-spacing:-.01em;}
+.event-club{font-size:.72rem;color:var(--accent);margin-bottom:.5rem;text-transform:uppercase;letter-spacing:.08em;font-weight:600;}
+.event-desc{font-size:.8rem;color:var(--muted);line-height:1.5;margin-bottom:.75rem;}
+.event-rsvp{background:transparent;border:1px solid var(--border2);color:var(--muted);padding:.3rem .85rem;border-radius:4px;font-size:.75rem;cursor:pointer;font-family:'Space Grotesk',sans-serif;transition:.2s;text-transform:uppercase;letter-spacing:.05em;font-weight:600;}
+.event-rsvp:hover{border-color:var(--accent);color:var(--accent);}
+.event-rsvp.rsvped{background:var(--accent);color:#000;border-color:var(--accent);}
 
-  .feed-section{background:var(--surface);border-top:1px solid var(--border);}
-  .feed-inner{max-width:700px;margin:0 auto;}
-  .feed-item{display:flex;gap:1rem;padding:1.25rem 0;border-bottom:1px solid var(--border);}
-  .feed-icon{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0;background:var(--surface2);}
-  .feed-content{flex:1;}
-  .feed-title{font-weight:500;font-size:.92rem;margin-bottom:.2rem;}
-  .feed-meta{font-size:.78rem;color:var(--muted);}
-  .feed-meta strong{color:var(--accent);}
+/* ── RECRUITMENTS ── */
+.recruit-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(310px,1fr));gap:1.25rem;max-width:1200px;margin:0 auto;}
+.recruit-card{background:var(--card);border:1px solid var(--border2);border-radius:12px;padding:1.5rem;position:relative;overflow:hidden;transition:.2s;}
+.recruit-card:hover{border-color:var(--accent);background:var(--surface2);}
+.recruit-card::after{content:'';position:absolute;top:0;left:0;width:3px;height:100%;background:var(--accent);}
+.recruit-open{display:inline-flex;align-items:center;gap:.4rem;font-size:.68rem;color:var(--accent);font-weight:700;margin-bottom:1rem;text-transform:uppercase;letter-spacing:.1em;}
+.recruit-open::before{content:'';width:6px;height:6px;background:var(--accent);border-radius:50%;box-shadow:0 0 8px var(--accent);}
+.recruit-title{font-weight:700;font-size:1.05rem;margin-bottom:.25rem;letter-spacing:-.01em;}
+.recruit-club{font-size:.78rem;color:var(--muted);margin-bottom:.75rem;}
+.recruit-details{display:flex;gap:1.5rem;font-size:.75rem;color:var(--muted);margin-bottom:.75rem;}
+.recruit-deadline{font-size:.75rem;color:var(--accent2);margin-bottom:1rem;font-weight:500;}
+.btn-apply{width:100%;background:transparent;color:var(--accent);border:1px solid var(--accent);padding:.65rem;border-radius:6px;font-family:'Space Grotesk',sans-serif;font-size:.82rem;font-weight:700;cursor:pointer;transition:.2s;text-transform:uppercase;letter-spacing:.05em;}
+.btn-apply:hover{background:var(--accent);color:#000;}
 
-  .empty-state{text-align:center;padding:3rem;color:var(--muted);grid-column:1/-1;}
-  .empty-state .empty-icon{font-size:3rem;margin-bottom:1rem;}
-  .loading{text-align:center;padding:3rem;color:var(--muted);grid-column:1/-1;}
+/* ── FEED ── */
+.feed-wrap{background:var(--surface);border-top:1px solid var(--border2);}
+.feed-inner{max-width:720px;margin:0 auto;}
+.feed-item{display:flex;gap:1rem;padding:1.5rem 0;border-bottom:1px solid var(--border);}
+.feed-item:last-child{border-bottom:none;}
+.feed-line{width:2px;background:linear-gradient(to bottom,var(--accent),transparent);border-radius:999px;flex-shrink:0;margin:4px 0;}
+.feed-content{flex:1;}
+.feed-title{font-weight:500;font-size:.9rem;margin-bottom:.3rem;line-height:1.5;}
+.feed-meta{font-size:.75rem;color:var(--muted);}
+.feed-meta strong{color:var(--accent);}
 
-  footer{background:var(--surface);border-top:1px solid var(--border);padding:3rem;text-align:center;color:var(--muted);font-size:.85rem;position:relative;z-index:1;}
-  .foot-logo{font-family:'Syne',sans-serif;font-weight:800;font-size:1.3rem;margin-bottom:.5rem;}
-  .foot-logo span{color:var(--accent);}
+/* ── EMPTY / LOADING ── */
+.empty-state{text-align:center;padding:4rem;color:var(--muted);grid-column:1/-1;}
+.empty-icon{font-size:3rem;margin-bottom:1rem;}
+.loading{text-align:center;padding:3rem;color:var(--muted);grid-column:1/-1;letter-spacing:.1em;text-transform:uppercase;font-size:.8rem;}
 
-  .modal-overlay{display:none;position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.75);backdrop-filter:blur(8px);align-items:center;justify-content:center;padding:1rem;}
-  .modal-overlay.open{display:flex;}
-  .modal{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:2rem;max-width:480px;width:100%;animation:fadeUp .3s ease;max-height:90vh;overflow-y:auto;}
-  .modal h2{font-family:'Syne',sans-serif;font-weight:800;font-size:1.4rem;margin-bottom:1rem;}
-  .modal-close{float:right;background:none;border:none;color:var(--muted);font-size:1.4rem;cursor:pointer;margin-top:-.5rem;margin-right:-.5rem;}
-  .form-group{margin-bottom:1rem;}
-  .form-group label{display:block;font-size:.82rem;color:var(--muted);margin-bottom:.4rem;}
-  .form-group input,.form-group select,.form-group textarea{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:9px;padding:.7rem 1rem;color:var(--text);font-family:'DM Sans',sans-serif;font-size:.9rem;outline:none;transition:border-color .2s;}
-  .form-group input:focus,.form-group select:focus,.form-group textarea:focus{border-color:var(--accent);}
-  .form-group select option{background:var(--surface);}
+/* ── FOOTER ── */
+footer{background:var(--surface);border-top:1px solid var(--border2);padding:3rem 2.5rem;position:relative;z-index:1;}
+.footer-inner{max-width:1200px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem;}
+.footer-logo{font-family:'Bebas Neue',sans-serif;font-size:1.8rem;letter-spacing:.05em;}
+.footer-logo span{color:var(--accent);}
+.footer-copy{font-size:.78rem;color:var(--muted);}
 
-  .toast{position:fixed;bottom:2rem;right:2rem;background:var(--surface);border:1px solid var(--accent3);color:var(--text);padding:1rem 1.5rem;border-radius:12px;z-index:999;font-size:.9rem;animation:fadeUp .3s ease;display:none;}
-  .toast.show{display:block;}
+/* ── MODALS ── */
+.modal-overlay{display:none;position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.85);backdrop-filter:blur(10px);align-items:center;justify-content:center;padding:1rem;}
+.modal-overlay.open{display:flex;}
+.modal{background:var(--surface);border:1px solid var(--border2);border-radius:16px;padding:2rem;max-width:480px;width:100%;animation:fadeUp .3s ease;max-height:90vh;overflow-y:auto;}
+.modal h2{font-family:'Bebas Neue',sans-serif;font-size:2rem;letter-spacing:.04em;margin-bottom:1rem;}
+.modal-close{float:right;background:none;border:none;color:var(--muted);font-size:1.4rem;cursor:pointer;margin-top:-.25rem;}
+.form-group{margin-bottom:1rem;}
+.form-group label{display:block;font-size:.75rem;color:var(--muted);margin-bottom:.4rem;text-transform:uppercase;letter-spacing:.08em;font-weight:600;}
+.form-group input,.form-group select,.form-group textarea{width:100%;background:var(--bg);border:1px solid var(--border2);border-radius:8px;padding:.7rem 1rem;color:var(--text);font-family:'Space Grotesk',sans-serif;font-size:.9rem;outline:none;transition:.2s;}
+.form-group input:focus,.form-group select:focus,.form-group textarea:focus{border-color:var(--accent);}
+.form-group select option{background:var(--surface);}
+.auth-tabs{display:flex;gap:.5rem;margin-bottom:1.5rem;}
+.auth-tab{flex:1;padding:.55rem;border-radius:6px;border:1px solid var(--border2);background:none;color:var(--muted);font-family:'Space Grotesk',sans-serif;font-size:.82rem;cursor:pointer;transition:.2s;text-transform:uppercase;letter-spacing:.05em;font-weight:600;}
+.auth-tab.active{background:var(--accent);color:#000;border-color:var(--accent);}
 
-  .user-avatar{width:34px;height:34px;border-radius:50%;background:var(--accent);color:#fff;border:none;font-size:.85rem;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;}
-  .user-menu{position:relative;}
-  .user-dropdown{position:absolute;top:calc(100% + .5rem);right:0;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:.5rem;min-width:180px;display:none;z-index:200;box-shadow:0 8px 30px #00000066;}
-  .user-dropdown.open{display:block;}
-  .user-info{padding:.6rem .75rem;border-bottom:1px solid var(--border);margin-bottom:.25rem;}
-  .user-info-name{font-weight:600;font-size:.88rem;}
-  .user-info-email{font-size:.75rem;color:var(--muted);margin-top:.1rem;}
-  .dropdown-item{display:block;width:100%;text-align:left;background:none;border:none;color:var(--muted);padding:.6rem .75rem;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:.85rem;cursor:pointer;transition:.2s;}
-  .dropdown-item:hover{background:var(--surface2);color:var(--text);}
-  .dropdown-item.danger{color:#ff9eb5;}
-  .dropdown-item.danger:hover{background:#ff658422;}
-  .auth-tabs{display:flex;gap:.5rem;margin-bottom:1.5rem;}
-  .auth-tab{flex:1;padding:.6rem;border-radius:8px;border:1px solid var(--border);background:none;color:var(--muted);font-family:'DM Sans',sans-serif;font-size:.9rem;cursor:pointer;transition:.2s;}
-  .auth-tab.active{background:var(--accent);color:#fff;border-color:var(--accent);}
+/* ── TOAST ── */
+.toast{position:fixed;bottom:2rem;right:2rem;background:var(--surface);border:1px solid var(--border2);border-left:3px solid var(--accent);color:var(--text);padding:1rem 1.5rem;border-radius:8px;z-index:9999;font-size:.88rem;display:none;animation:fadeUp .3s ease;font-weight:500;}
+.toast.show{display:block;}
 
-  @media(max-width:768px){
-    nav{padding:1rem 1.5rem;}
-    .nav-links{display:none;}
-    section{padding:4rem 1.5rem;}
-    .search-section{padding:1.5rem;}
-    .hero-stats{gap:1.5rem;}
-    .ticker{padding:.6rem 1.5rem;}
-  }
+/* ── RESPONSIVE ── */
+@media(max-width:768px){
+  nav{padding:.9rem 1.25rem;}
+  .nav-links{display:none;}
+  section{padding:4rem 1.25rem;}
+  .search-section{padding:1.25rem;}
+  .hero-stats{flex-wrap:wrap;border-radius:12px;}
+  .stat{padding:1rem 1.5rem;}
+  .ticker{padding:.5rem 1.25rem;}
+  .hero h1{font-size:clamp(4rem,18vw,8rem);}
+}
 </style>
 </head>
 <body>
 
+<!-- NAV -->
 <nav>
-  <div class="nav-logo">Campus<span>Hub</span></div>
+  <div class="nav-logo"><div class="nav-logo-dot"></div>CAMPUS<span style="color:var(--accent)">HUB</span></div>
   <div class="nav-links">
     <a href="#clubs">Clubs</a>
     <a href="#events">Events</a>
-    <a href="#recruitments">Recruitments</a>
+    <a href="#recruitments">Join</a>
     <a href="#feed">Updates</a>
   </div>
   <div class="nav-right">
-    <a href="admin.html" class="admin-link">⚙️ Club Admin</a>
+    <a href="admin.html" class="admin-link">⚙ Admin</a>
     <div class="user-menu" id="userMenu">
-      <button class="nav-cta" id="loginBtn" onclick="openAuthModal('login')">Sign In</button>
+      <button class="nav-cta" onclick="openAuthModal('login')">Sign In</button>
     </div>
   </div>
 </nav>
 
+<!-- TICKER -->
 <div class="ticker">
   <span class="ticker-label">Live</span>
   <div class="ticker-wrap">
-    <div class="ticker-track" id="tickerTrack">
-      <span>Loading announcements...</span>
-    </div>
+    <div class="ticker-track" id="tickerTrack">Loading announcements...</div>
   </div>
 </div>
 
+<!-- HERO -->
 <section class="hero">
-  <div class="hero-glow"></div>
-  <div class="hero-badge"><span class="badge-dot"></span><span id="heroBadge">Loading clubs...</span></div>
-  <h1>Every Club.<br>Every Event.<br><em>One Place.</em></h1>
-  <p class="hero-sub">Your college's unified platform for societies, clubs, events, recruitments, and announcements — so nothing ever goes unnoticed.</p>
-  <div class="hero-actions">
-    <button class="btn-primary" onclick="document.getElementById('clubs').scrollIntoView()">Explore Clubs</button>
-    <button class="btn-ghost" onclick="document.getElementById('events').scrollIntoView()">Upcoming Events →</button>
+  <div class="hero-bg">
+    <img class="hero-img" src="https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=1600&q=80&auto=format&fit=crop" alt=""/>
+    <div class="hero-overlay"></div>
   </div>
-  <div class="hero-stats">
-    <div class="stat"><div class="stat-num" id="statClubs">—</div><div class="stat-label">Active Clubs</div></div>
-    <div class="stat"><div class="stat-num" id="statEvents">—</div><div class="stat-label">Upcoming Events</div></div>
-    <div class="stat"><div class="stat-num" id="statRecruits">—</div><div class="stat-label">Open Recruitments</div></div>
+  <div class="hero-content">
+    <div class="hero-tag"><span class="hero-tag-dot"></span><span id="heroBadge">Loading clubs...</span></div>
+    <h1>
+      <span class="small">Your College</span>
+      EVERY<br/><span class="outline">CLUB.</span>
+    </h1>
+    <p class="hero-sub">One platform for all societies, clubs, events, recruitments and announcements. Nothing goes unnoticed.</p>
+    <div class="hero-actions">
+      <button class="btn-primary" onclick="document.getElementById('clubs').scrollIntoView()">Explore Clubs</button>
+      <button class="btn-ghost" onclick="document.getElementById('events').scrollIntoView()">Upcoming Events →</button>
+    </div>
+    <div class="hero-stats">
+      <div class="stat"><div class="stat-num" id="statClubs">—</div><div class="stat-label">Active Clubs</div></div>
+      <div class="stat"><div class="stat-num" id="statEvents">—</div><div class="stat-label">Events</div></div>
+      <div class="stat"><div class="stat-num" id="statRecruits">—</div><div class="stat-label">Open Roles</div></div>
+    </div>
   </div>
 </section>
 
+<!-- SEARCH + FILTER -->
 <div class="search-section" id="clubs">
   <div class="search-wrap">
-    <input class="search-input" type="text" placeholder="🔍  Search clubs, events, or recruitments..." oninput="filterClubs(this.value)"/>
+    <input class="search-input" type="text" placeholder="Search clubs, events, recruitments..." oninput="filterClubs(this.value)"/>
     <div class="filter-pills">
       <button class="pill active" onclick="setFilter(this,'all')">All</button>
       <button class="pill" onclick="setFilter(this,'Technology')">💻 Tech</button>
@@ -224,424 +277,332 @@
   </div>
 </div>
 
+<!-- CLUBS -->
 <section>
   <div style="max-width:1200px;margin:0 auto;">
-    <div class="section-head">
-      <div class="section-label">Societies & Clubs</div>
-      <h2 class="section-title">Find your people on campus</h2>
-    </div>
-    <div class="clubs-grid" id="clubsGrid">
-      <div class="loading">⏳ Loading clubs...</div>
-    </div>
+    <div class="section-eyebrow">Societies & Clubs</div>
+    <div class="section-title">Find your<br/><span class="dim">people.</span></div>
+    <div class="clubs-grid" id="clubsGrid"><div class="loading">Loading clubs...</div></div>
   </div>
 </section>
 
-<section class="events-section" id="events">
+<!-- EVENTS -->
+<section class="events-wrap" id="events">
   <div style="max-width:1200px;margin:0 auto;">
-    <div class="section-head">
-      <div class="section-label">Upcoming Events</div>
-      <h2 class="section-title">What's happening on campus</h2>
-    </div>
-    <div class="events-grid" id="eventsGrid">
-      <div class="loading">⏳ Loading events...</div>
-    </div>
+    <div class="section-eyebrow">Upcoming Events</div>
+    <div class="section-title">What's<br/><span class="dim">happening.</span></div>
+    <div class="events-grid" id="eventsGrid"><div class="loading">Loading events...</div></div>
   </div>
 </section>
 
+<!-- RECRUITMENTS -->
 <section id="recruitments">
   <div style="max-width:1200px;margin:0 auto;">
-    <div class="section-head">
-      <div class="section-label">Open Recruitments</div>
-      <h2 class="section-title">Apply & join a club today</h2>
-    </div>
-    <div class="recruit-grid" id="recruitGrid">
-      <div class="loading">⏳ Loading recruitments...</div>
-    </div>
+    <div class="section-eyebrow">Open Recruitments</div>
+    <div class="section-title">Join a<br/><span class="dim">club.</span></div>
+    <div class="recruit-grid" id="recruitGrid"><div class="loading">Loading...</div></div>
   </div>
 </section>
 
-<section class="feed-section" id="feed">
-  <div style="max-width:700px;margin:0 auto;">
-    <div class="section-head">
-      <div class="section-label">Latest Updates</div>
-      <h2 class="section-title">Campus announcement feed</h2>
-    </div>
-    <div class="feed-inner" id="feedInner">
-      <div class="loading">⏳ Loading announcements...</div>
-    </div>
+<!-- FEED -->
+<section class="feed-wrap" id="feed">
+  <div style="max-width:720px;margin:0 auto;">
+    <div class="section-eyebrow">Announcements</div>
+    <div class="section-title">Latest<br/><span class="dim">updates.</span></div>
+    <div class="feed-inner" id="feedInner"><div class="loading">Loading...</div></div>
   </div>
 </section>
 
+<!-- FOOTER -->
 <footer>
-  <div class="foot-logo">Campus<span>Hub</span></div>
-  <p style="margin-top:.5rem;">Your college's unified club & events platform</p>
-  <p style="margin-top:1.5rem;font-size:.75rem;">Built with ❤️ for students, by students</p>
+  <div class="footer-inner">
+    <div class="footer-logo">CAMPUS<span>HUB</span></div>
+    <div class="footer-copy">Built for students · Powered by your college community</div>
+  </div>
 </footer>
 
 <!-- AUTH MODAL -->
 <div class="modal-overlay" id="modal-auth">
   <div class="modal">
     <button class="modal-close" onclick="closeModal('auth')">×</button>
-    <h2 id="authTitle">Welcome 👋</h2>
+    <h2 id="authTitle">WELCOME BACK</h2>
     <div class="auth-tabs">
       <button class="auth-tab active" id="tab-login" onclick="switchAuthTab('login')">Sign In</button>
       <button class="auth-tab" id="tab-register" onclick="switchAuthTab('register')">Register</button>
     </div>
-    <!-- LOGIN FORM -->
     <div id="loginForm">
       <div class="form-group"><label>College Email</label><input type="email" id="loginEmail" placeholder="yourname@college.edu"/></div>
       <div class="form-group"><label>Password</label><input type="password" id="loginPassword" placeholder="••••••••"/></div>
       <button class="btn-primary" style="width:100%;margin-top:.5rem;" onclick="loginStudent()">Sign In →</button>
-      <p style="text-align:center;margin-top:1rem;font-size:.82rem;color:var(--muted);">New here? <span style="color:var(--accent);cursor:pointer;" onclick="switchAuthTab('register')">Create an account</span></p>
+      <p style="text-align:center;margin-top:1rem;font-size:.8rem;color:var(--muted);">New here? <span style="color:var(--accent);cursor:pointer;font-weight:600;" onclick="switchAuthTab('register')">Create account</span></p>
     </div>
-    <!-- REGISTER FORM -->
     <div id="registerForm" style="display:none;">
-      <div class="form-group"><label>Full Name *</label><input type="text" id="regName" placeholder="Your full name"/></div>
-      <div class="form-group"><label>College Email *</label><input type="email" id="regEmail" placeholder="yourname@college.edu"/></div>
-      <div class="form-group"><label>Branch & Year *</label>
+      <div class="form-group"><label>Full Name</label><input type="text" id="regName" placeholder="Your full name"/></div>
+      <div class="form-group"><label>College Email</label><input type="email" id="regEmail" placeholder="yourname@college.edu"/></div>
+      <div class="form-group"><label>Branch & Year</label>
         <select id="regBranch">
           <option value="">Select branch & year</option>
           <option>CSE — 1st Year</option><option>CSE — 2nd Year</option><option>CSE — 3rd Year</option><option>CSE — 4th Year</option>
-          <option>ECE — 1st Year</option><option>ECE — 2nd Year</option><option>ECE — 3rd Year</option><option>ECE — 4th Year</option>
-          <option>ME — 1st Year</option><option>ME — 2nd Year</option><option>ME — 3rd Year</option><option>ME — 4th Year</option>
-          <option>Civil — 1st Year</option><option>Civil — 2nd Year</option><option>Other</option>
+          <option>ECE — 1st Year</option><option>ECE — 2nd Year</option><option>ECE — 3rd Year</option>
+          <option>ME — 1st Year</option><option>ME — 2nd Year</option><option>Other</option>
         </select>
       </div>
-      <div class="form-group"><label>Password *</label><input type="password" id="regPassword" placeholder="Min 6 characters"/></div>
+      <div class="form-group"><label>Password</label><input type="password" id="regPassword" placeholder="Min 6 characters"/></div>
       <button class="btn-primary" style="width:100%;margin-top:.5rem;" onclick="registerStudent()">Create Account →</button>
-      <p style="text-align:center;margin-top:1rem;font-size:.82rem;color:var(--muted);">Already have an account? <span style="color:var(--accent);cursor:pointer;" onclick="switchAuthTab('login')">Sign in</span></p>
+      <p style="text-align:center;margin-top:1rem;font-size:.8rem;color:var(--muted);">Already registered? <span style="color:var(--accent);cursor:pointer;font-weight:600;" onclick="switchAuthTab('login')">Sign in</span></p>
     </div>
   </div>
 </div>
 
-<!-- Apply Modal -->
+<!-- APPLY MODAL -->
 <div class="modal-overlay" id="modal-apply">
   <div class="modal">
     <button class="modal-close" onclick="closeModal('apply')">×</button>
-    <h2>Apply for Role 🚀</h2>
-    <p style="color:var(--muted);font-size:.88rem;margin-bottom:1.5rem;">Applying for: <strong id="applyRoleLabel" style="color:var(--accent)"></strong></p>
+    <h2>APPLY NOW</h2>
+    <p style="color:var(--muted);font-size:.85rem;margin-bottom:1.5rem;">Role: <strong id="applyRoleLabel" style="color:var(--accent)"></strong></p>
     <div class="form-group"><label>Full Name</label><input type="text" id="applyName" placeholder="Your full name"/></div>
     <div class="form-group"><label>Branch & Year</label>
       <select id="applyBranch">
         <option>CSE — 1st Year</option><option>CSE — 2nd Year</option><option>CSE — 3rd Year</option>
         <option>ECE — 1st Year</option><option>ECE — 2nd Year</option>
-        <option>ME — 1st Year</option><option>ME — 2nd Year</option><option>Other</option>
+        <option>ME — 1st Year</option><option>Other</option>
       </select>
     </div>
-    <div class="form-group"><label>Why do you want to join?</label><textarea id="applyWhy" rows="4" placeholder="Tell the club why you're a great fit..."></textarea></div>
-    <div class="form-group"><label>Portfolio / Social link (optional)</label><input type="text" id="applyLink" placeholder="GitHub, Behance, Instagram..."/></div>
-    <button class="btn-primary" style="width:100%;margin-top:.5rem;" onclick="submitApply()">Submit Application</button>
+    <div class="form-group"><label>Why do you want to join?</label><textarea id="applyWhy" rows="4" placeholder="Tell them why you're the right fit..."></textarea></div>
+    <div class="form-group"><label>Portfolio / Link (optional)</label><input type="text" id="applyLink" placeholder="GitHub, Behance, Instagram..."/></div>
+    <button class="btn-primary" style="width:100%;margin-top:.5rem;" onclick="submitApply()">Submit Application →</button>
   </div>
 </div>
 
 <div class="toast" id="toast"></div>
 
 <script>
-const SUPABASE_URL = 'https://obnfjycughgdhfcwoyrf.supabase.co';
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9ibmZqeWN1Z2hnZGhmY3dveXJmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk5NjU1OTEsImV4cCI6MjA5NTU0MTU5MX0.oZxSChlq-MLq7c4XUG0VRaS99z-6zj_tlou_G4qyUsQ';
-const { createClient } = supabase;
-const db = createClient(SUPABASE_URL, SUPABASE_KEY);
+const SUPABASE_URL='https://obnfjycughgdhfcwoyrf.supabase.co';
+const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9ibmZqeWN1Z2hnZGhmY3dveXJmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk5NjU1OTEsImV4cCI6MjA5NTU0MTU5MX0.oZxSChlq-MLq7c4XUG0VRaS99z-6zj_tlou_G4qyUsQ';
+const {createClient}=supabase;
+const db=createClient(SUPABASE_URL,SUPABASE_KEY);
+let allClubs=[];
 
-let allClubs = [];
-let currentFilter = 'all';
-let currentApplyRole = '';
-
-function showToast(msg) {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 3000);
+function showToast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),3500);
+}
+function timeAgo(d){
+  const diff=Date.now()-new Date(d);
+  const m=Math.floor(diff/60000);
+  if(m<60)return m+'m ago';
+  const h=Math.floor(m/60);
+  if(h<24)return h+'h ago';
+  return Math.floor(h/24)+'d ago';
+}
+function formatDate(s){
+  if(!s)return{day:'—',month:'—'};
+  const d=new Date(s);
+  return{day:d.getDate(),month:d.toLocaleString('default',{month:'short'})};
 }
 
-function timeAgo(dateStr) {
-  const diff = Date.now() - new Date(dateStr);
-  const mins = Math.floor(diff/60000);
-  if(mins < 60) return mins + ' minutes ago';
-  const hrs = Math.floor(mins/60);
-  if(hrs < 24) return hrs + ' hours ago';
-  return Math.floor(hrs/24) + ' days ago';
-}
-
-function formatDate(dateStr) {
-  if(!dateStr) return '—';
-  const d = new Date(dateStr);
-  return { day: d.getDate(), month: d.toLocaleString('default',{month:'short'}) };
-}
-
-// LOAD CLUBS
-async function loadClubs() {
-  const { data, error } = await db.from('clubs').select('*').order('created_at', { ascending: false });
-  if(error || !data || data.length === 0) {
-    document.getElementById('clubsGrid').innerHTML = `<div class="empty-state"><div class="empty-icon">🏛️</div><p>No clubs yet. <a href="admin.html" style="color:var(--accent)">Add your first club →</a></p></div>`;
-    document.getElementById('statClubs').textContent = '0';
-    document.getElementById('heroBadge').textContent = 'Be the first to add clubs!';
+// CLUBS
+async function loadClubs(){
+  const{data,error}=await db.from('clubs').select('*').order('created_at',{ascending:false});
+  if(error||!data||data.length===0){
+    document.getElementById('clubsGrid').innerHTML=`<div class="empty-state"><div class="empty-icon">🏛️</div><p>No clubs yet. <a href="admin.html" style="color:var(--accent)">Add your first club →</a></p></div>`;
+    document.getElementById('statClubs').textContent='0';
+    document.getElementById('heroBadge').textContent='Be the first to add clubs!';
     return;
   }
-  allClubs = data;
-  document.getElementById('statClubs').textContent = data.length;
-  document.getElementById('heroBadge').textContent = `${data.length} clubs · Live on campus`;
+  allClubs=data;
+  document.getElementById('statClubs').textContent=data.length;
+  document.getElementById('heroBadge').textContent=data.length+' clubs live on campus';
   renderClubs(data);
 }
-
-function renderClubs(clubs) {
-  const grid = document.getElementById('clubsGrid');
-  if(!clubs.length) {
-    grid.innerHTML = `<div class="empty-state"><div class="empty-icon">🔍</div><p>No clubs found for this filter.</p></div>`;
-    return;
-  }
-  grid.innerHTML = clubs.map(c => `
+function renderClubs(clubs){
+  const grid=document.getElementById('clubsGrid');
+  if(!clubs.length){grid.innerHTML=`<div class="empty-state"><div class="empty-icon">🔍</div><p>No clubs match this filter.</p></div>`;return;}
+  grid.innerHTML=clubs.map(c=>`
     <div class="club-card">
-      <div class="club-banner" style="background:linear-gradient(135deg,#1a1a30,#0a0a20);overflow:hidden;">${c.logo_url ? `<img src="${c.logo_url}" style="width:100%;height:100%;object-fit:cover;"/>` : (c.emoji||'🎯')}</div>
+      <div class="club-banner">
+        ${c.logo_url?`<img class="club-banner-img" src="${c.logo_url}" alt="${c.name}"/>`:''}
+        <span style="position:relative;z-index:1;font-size:2.5rem;">${c.logo_url?'':c.emoji||'🎯'}</span>
+      </div>
       <div class="club-body">
         <div class="club-top">
-          <div class="club-avatar">${c.logo_url ? `<img src="${c.logo_url}" style="width:100%;height:100%;object-fit:cover;border-radius:10px;"/>` : (c.emoji||'🎯')}</div>
-          <div>
-            <div class="club-name">${c.name}</div>
-            <div class="club-category">${c.category||'General'}</div>
-          </div>
+          <div class="club-avatar">${c.logo_url?`<img src="${c.logo_url}" style="width:100%;height:100%;object-fit:cover;border-radius:7px;"/>`:(c.emoji||'🎯')}</div>
+          <div><div class="club-name">${c.name}</div><div class="club-category">${c.category||'General'}</div></div>
         </div>
         <p class="club-desc">${c.description||'No description yet.'}</p>
-        <div class="club-meta">
-          <span>👥 ${c.members||0} members</span>
-        </div>
+        <div class="club-meta"><span>👥 ${c.members||0} members</span></div>
         <div class="club-actions">
-          <button class="btn-sm btn-follow" onclick="this.textContent=this.textContent.includes('+')?'✓ Following':'+ Follow';this.style.background=this.textContent.includes('✓')?'var(--accent3)':'var(--accent)';this.style.color=this.textContent.includes('✓')?'#000':'#fff'">+ Follow</button>
+          <button class="btn-sm btn-follow" onclick="this.textContent=this.textContent.includes('+')?'✓ Following':'+ Follow';this.style.background=this.textContent.includes('✓')?'#22c55e':'var(--accent)';this.style.color='#000'">+ Follow</button>
         </div>
       </div>
-    </div>
-  `).join('');
+    </div>`).join('');
 }
-
-function filterClubs(val) {
-  const filtered = allClubs.filter(c =>
-    c.name.toLowerCase().includes(val.toLowerCase()) ||
-    (c.description||'').toLowerCase().includes(val.toLowerCase()) ||
-    (c.category||'').toLowerCase().includes(val.toLowerCase())
-  );
-  renderClubs(filtered);
+function filterClubs(v){
+  renderClubs(allClubs.filter(c=>c.name.toLowerCase().includes(v.toLowerCase())||(c.description||'').toLowerCase().includes(v.toLowerCase())||(c.category||'').toLowerCase().includes(v.toLowerCase())));
 }
-
-function setFilter(btn, cat) {
-  document.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
+function setFilter(btn,cat){
+  document.querySelectorAll('.pill').forEach(p=>p.classList.remove('active'));
   btn.classList.add('active');
-  currentFilter = cat;
-  if(cat === 'all') renderClubs(allClubs);
-  else renderClubs(allClubs.filter(c => c.category === cat));
+  renderClubs(cat==='all'?allClubs:allClubs.filter(c=>c.category===cat));
 }
 
-// LOAD EVENTS
-async function loadEvents() {
-  const today = new Date().toISOString().split('T')[0];
-  const { data, error } = await db.from('events').select('*').gte('event_date', today).order('event_date', { ascending: true });
-  if(error || !data || data.length === 0) {
-    document.getElementById('eventsGrid').innerHTML = `<div class="empty-state"><div class="empty-icon">📅</div><p>No upcoming events. <a href="admin.html" style="color:var(--accent)">Add an event →</a></p></div>`;
-    document.getElementById('statEvents').textContent = '0';
+// EVENTS
+async function loadEvents(){
+  const today=new Date().toISOString().split('T')[0];
+  const{data,error}=await db.from('events').select('*').gte('event_date',today).order('event_date',{ascending:true});
+  if(error||!data||data.length===0){
+    document.getElementById('eventsGrid').innerHTML=`<div class="empty-state"><div class="empty-icon">📅</div><p>No upcoming events. <a href="admin.html" style="color:var(--accent)">Add one →</a></p></div>`;
+    document.getElementById('statEvents').textContent='0';
     return;
   }
-  document.getElementById('statEvents').textContent = data.length + '+';
-  document.getElementById('eventsGrid').innerHTML = data.map(e => {
-    const d = formatDate(e.event_date);
-    return `
-    <div class="event-card" style="${e.poster_url ? 'flex-direction:column;padding:0;overflow:hidden;' : ''}">
-      ${e.poster_url ? `<img src="${e.poster_url}" style="width:100%;height:180px;object-fit:cover;"/>` : ''}
-      <div style="${e.poster_url ? 'padding:1rem;display:flex;gap:1rem;' : 'display:flex;gap:1rem;width:100%;'}">
-      <div class="event-date">
-        <div class="event-month">${d.month}</div>
-        <div class="event-day">${d.day}</div>
-      </div>
-      <div class="event-info">
-        <div class="event-title">${e.title}</div>
-        <div class="event-club">${e.club_name||''}</div>
-        <div class="event-desc">${e.description||''}</div>
-        <button class="event-rsvp" onclick="this.textContent=this.textContent==='RSVP →'?'✓ Going!':'RSVP →';this.style.color=this.textContent==='✓ Going!'?'var(--accent3)':'';this.style.borderColor=this.textContent==='✓ Going!'?'var(--accent3)':''">RSVP →</button>
-      </div>
+  document.getElementById('statEvents').textContent=data.length+'+';
+  document.getElementById('eventsGrid').innerHTML=data.map(e=>{
+    const d=formatDate(e.event_date);
+    return`<div class="event-card" style="${e.poster_url?'flex-direction:column;padding:0;overflow:hidden;':''}">
+      ${e.poster_url?`<img src="${e.poster_url}" style="width:100%;height:190px;object-fit:cover;"/>`:'' }
+      <div style="${e.poster_url?'padding:1.25rem;display:flex;gap:1rem;':'display:flex;gap:1rem;width:100%;'}">
+        <div class="event-date-box"><div class="event-month">${d.month}</div><div class="event-day">${d.day}</div></div>
+        <div class="event-info">
+          <div class="event-title">${e.title}</div>
+          <div class="event-club">${e.club_name||''}</div>
+          <div class="event-desc">${e.description||''}</div>
+          <button class="event-rsvp" onclick="this.classList.toggle('rsvped');this.textContent=this.classList.contains('rsvped')?'✓ Going!':'RSVP →'">RSVP →</button>
+        </div>
       </div>
     </div>`;
   }).join('');
 }
 
-// LOAD RECRUITMENTS
-async function loadRecruitments() {
-  const { data, error } = await db.from('recruitments').select('*').eq('is_open', true).order('deadline', { ascending: true });
-  if(error || !data || data.length === 0) {
-    document.getElementById('recruitGrid').innerHTML = `<div class="empty-state"><div class="empty-icon">📋</div><p>No open recruitments. <a href="admin.html" style="color:var(--accent)">Post a recruitment →</a></p></div>`;
-    document.getElementById('statRecruits').textContent = '0';
+// RECRUITMENTS
+async function loadRecruitments(){
+  const{data,error}=await db.from('recruitments').select('*').eq('is_open',true).order('deadline',{ascending:true});
+  if(error||!data||data.length===0){
+    document.getElementById('recruitGrid').innerHTML=`<div class="empty-state"><div class="empty-icon">📋</div><p>No open recruitments. <a href="admin.html" style="color:var(--accent)">Post one →</a></p></div>`;
+    document.getElementById('statRecruits').textContent='0';
     return;
   }
-  document.getElementById('statRecruits').textContent = data.length;
-  document.getElementById('recruitGrid').innerHTML = data.map(r => `
+  document.getElementById('statRecruits').textContent=data.length;
+  document.getElementById('recruitGrid').innerHTML=data.map(r=>`
     <div class="recruit-card">
-      <div class="recruit-open">● Open</div>
+      <div class="recruit-open">Open</div>
       <div class="recruit-title">${r.role}</div>
       <div class="recruit-club">${r.club_name||''}</div>
-      <div class="recruit-details">
-        <span>📌 ${r.category||'General'}</span>
-        <span>🕐 ${r.hours_per_week||'—'} hrs/week</span>
-      </div>
-      <div class="recruit-deadline">⏳ Deadline: ${r.deadline ? new Date(r.deadline).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'}) : 'Open'}</div>
-      <button class="btn-apply" onclick="openApply('${r.role} — ${r.club_name||''}')">Apply Now</button>
-    </div>
-  `).join('');
+      <div class="recruit-details"><span>📌 ${r.category||'General'}</span><span>🕐 ${r.hours_per_week||'—'} hrs/wk</span></div>
+      <div class="recruit-deadline">⏳ Deadline: ${r.deadline?new Date(r.deadline).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'}):'Open'}</div>
+      <button class="btn-apply" onclick="openApply('${r.role} — ${r.club_name||''}')">Apply Now →</button>
+    </div>`).join('');
 }
 
-// LOAD ANNOUNCEMENTS
-async function loadAnnouncements() {
-  const { data, error } = await db.from('announcements').select('*').order('created_at', { ascending: false }).limit(10);
-  if(error || !data || data.length === 0) {
-    document.getElementById('feedInner').innerHTML = `<div class="empty-state"><div class="empty-icon">📢</div><p>No announcements yet. <a href="admin.html" style="color:var(--accent)">Post one →</a></p></div>`;
-    // ticker
-    document.getElementById('tickerTrack').innerHTML = '<span>Welcome to CampusHub!</span> No announcements yet — club heads, log in to post updates!';
+// ANNOUNCEMENTS
+async function loadAnnouncements(){
+  const{data,error}=await db.from('announcements').select('*').order('created_at',{ascending:false}).limit(10);
+  if(error||!data||data.length===0){
+    document.getElementById('feedInner').innerHTML=`<div class="empty-state"><div class="empty-icon">📢</div><p>No announcements yet.</p></div>`;
+    document.getElementById('tickerTrack').innerHTML='<span>Welcome to CampusHub!</span> — Club heads, log in to post updates!';
     return;
   }
-  // Feed
-  document.getElementById('feedInner').innerHTML = data.map(a => `
+  document.getElementById('feedInner').innerHTML=data.map(a=>`
     <div class="feed-item">
-      <div class="feed-icon">📢</div>
+      <div class="feed-line"></div>
       <div class="feed-content">
         <div class="feed-title">${a.message}</div>
         <div class="feed-meta"><strong>${a.club_name||'Campus'}</strong> · ${timeAgo(a.created_at)}</div>
-        ${a.image_url ? `<img src="${a.image_url}" style="margin-top:.75rem;max-width:100%;max-height:280px;border-radius:10px;border:1px solid var(--border);object-fit:cover;display:block;"/>` : ''}
+        ${a.image_url?`<img src="${a.image_url}" style="margin-top:.75rem;max-width:100%;max-height:300px;border-radius:8px;border:1px solid var(--border2);object-fit:cover;display:block;"/>`:''}
       </div>
-    </div>
-  `).join('');
-  // Ticker
-  const tickerText = data.map(a => `<span>${a.club_name||'Campus'}</span> — ${a.message}`).join(' &nbsp;·&nbsp; ');
-  document.getElementById('tickerTrack').innerHTML = tickerText + ' &nbsp;·&nbsp; ' + tickerText;
+    </div>`).join('');
+  const t=data.map(a=>`<span style="font-weight:700;">${a.club_name||'Campus'}</span> — ${a.message}`).join(' &nbsp;·&nbsp; ');
+  document.getElementById('tickerTrack').innerHTML=t+' &nbsp;·&nbsp; '+t;
 }
 
-// APPLY MODAL
-function openApply(role) {
-  const user = getCurrentUser();
-  if(!user) {
-    showToast('⚠️ Please sign in first to apply!');
-    openAuthModal('login');
-    return;
-  }
-  currentApplyRole = role;
-  document.getElementById('applyRoleLabel').textContent = role;
-  // Pre-fill from logged in user
-  document.getElementById('applyName').value = user.name || '';
+// APPLY
+function openApply(role){
+  const user=getCurrentUser();
+  if(!user){showToast('⚠️ Please sign in first to apply!');openAuthModal('login');return;}
+  document.getElementById('applyRoleLabel').textContent=role;
+  document.getElementById('applyName').value=user.name||'';
   document.getElementById('modal-apply').classList.add('open');
 }
-function closeModal(id) {
-  document.getElementById('modal-'+id).classList.remove('open');
-}
-document.querySelectorAll('.modal-overlay').forEach(el => {
-  el.addEventListener('click', e => { if(e.target===el) el.classList.remove('open'); });
-});
-
-async function submitApply() {
-  const name = document.getElementById('applyName').value.trim();
-  const branch = document.getElementById('applyBranch').value;
-  const why = document.getElementById('applyWhy').value.trim();
-  if(!name || !why) { showToast('⚠️ Please fill in all required fields'); return; }
+function closeModal(id){document.getElementById('modal-'+id).classList.remove('open');}
+document.querySelectorAll('.modal-overlay').forEach(el=>{el.addEventListener('click',e=>{if(e.target===el)el.classList.remove('open');});});
+async function submitApply(){
+  const name=document.getElementById('applyName').value.trim();
+  const why=document.getElementById('applyWhy').value.trim();
+  if(!name||!why){showToast('⚠️ Please fill all required fields');return;}
   closeModal('apply');
-  showToast('🎉 Application submitted! The club will reach out soon.');
+  showToast('🎉 Application submitted!');
   document.getElementById('applyName').value='';
   document.getElementById('applyWhy').value='';
   document.getElementById('applyLink').value='';
 }
 
-// ─── STUDENT AUTH ───
-function getCurrentUser() {
-  const u = sessionStorage.getItem('campushub_user');
-  return u ? JSON.parse(u) : null;
-}
-
-function updateNavForUser(user) {
-  const menu = document.getElementById('userMenu');
-  if(user) {
-    const initials = user.name.split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase();
-    menu.innerHTML = `
-      <button class="user-avatar" onclick="toggleUserDropdown()">${initials}</button>
+// AUTH
+function getCurrentUser(){const u=sessionStorage.getItem('campushub_user');return u?JSON.parse(u):null;}
+function updateNavForUser(user){
+  const menu=document.getElementById('userMenu');
+  if(user){
+    const ini=user.name.split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase();
+    menu.innerHTML=`<button class="user-avatar" onclick="toggleUserDropdown()">${ini}</button>
       <div class="user-dropdown" id="userDropdown">
-        <div class="user-info">
-          <div class="user-info-name">${user.name}</div>
-          <div class="user-info-email">${user.email}</div>
-          <div style="font-size:.72rem;color:var(--muted);margin-top:.2rem;">${user.branch||''}</div>
-        </div>
-        <button class="dropdown-item" onclick="closeUserDropdown()">👤 My Profile</button>
+        <div class="user-info"><div class="user-info-name">${user.name}</div><div class="user-info-email">${user.email}</div><div style="font-size:.7rem;color:var(--muted);margin-top:.1rem;">${user.branch||''}</div></div>
         <button class="dropdown-item danger" onclick="logoutStudent()">🚪 Sign Out</button>
       </div>`;
   } else {
-    menu.innerHTML = `<button class="nav-cta" id="loginBtn" onclick="openAuthModal('login')">Sign In</button>`;
+    menu.innerHTML=`<button class="nav-cta" onclick="openAuthModal('login')">Sign In</button>`;
   }
 }
-
-function toggleUserDropdown() {
-  document.getElementById('userDropdown')?.classList.toggle('open');
+function toggleUserDropdown(){document.getElementById('userDropdown')?.classList.toggle('open');}
+document.addEventListener('click',e=>{const m=document.getElementById('userMenu');if(m&&!m.contains(e.target))document.getElementById('userDropdown')?.classList.remove('open');});
+function openAuthModal(tab){document.getElementById('modal-auth').classList.add('open');switchAuthTab(tab);}
+function switchAuthTab(tab){
+  document.getElementById('loginForm').style.display=tab==='login'?'block':'none';
+  document.getElementById('registerForm').style.display=tab==='register'?'block':'none';
+  document.getElementById('tab-login').classList.toggle('active',tab==='login');
+  document.getElementById('tab-register').classList.toggle('active',tab==='register');
+  document.getElementById('authTitle').textContent=tab==='login'?'WELCOME BACK':'CREATE ACCOUNT';
 }
-function closeUserDropdown() {
-  document.getElementById('userDropdown')?.classList.remove('open');
-}
-document.addEventListener('click', e => {
-  const menu = document.getElementById('userMenu');
-  if(menu && !menu.contains(e.target)) closeUserDropdown();
-});
-
-function openAuthModal(tab) {
-  document.getElementById('modal-auth').classList.add('open');
-  switchAuthTab(tab);
-}
-
-function switchAuthTab(tab) {
-  document.getElementById('loginForm').style.display = tab==='login' ? 'block' : 'none';
-  document.getElementById('registerForm').style.display = tab==='register' ? 'block' : 'none';
-  document.getElementById('tab-login').classList.toggle('active', tab==='login');
-  document.getElementById('tab-register').classList.toggle('active', tab==='register');
-  document.getElementById('authTitle').textContent = tab==='login' ? 'Welcome back 👋' : 'Create Account 🎓';
-}
-
-async function loginStudent() {
-  const email = document.getElementById('loginEmail').value.trim();
-  const password = document.getElementById('loginPassword').value;
-  if(!email || !password) { showToast('⚠️ Please fill in all fields'); return; }
-  const btn = document.querySelector('#loginForm .btn-primary');
-  btn.textContent = 'Signing in...'; btn.disabled = true;
-  const { data, error } = await db.from('students').select('*').eq('email', email).eq('password', password).single();
-  btn.textContent = 'Sign In →'; btn.disabled = false;
-  if(error || !data) { showToast('❌ Wrong email or password'); return; }
-  sessionStorage.setItem('campushub_user', JSON.stringify(data));
-  closeModal('auth');
-  updateNavForUser(data);
+async function loginStudent(){
+  const email=document.getElementById('loginEmail').value.trim();
+  const password=document.getElementById('loginPassword').value;
+  if(!email||!password){showToast('⚠️ Fill in all fields');return;}
+  const btn=document.querySelector('#loginForm .btn-primary');
+  btn.textContent='Signing in...';btn.disabled=true;
+  const{data,error}=await db.from('students').select('*').eq('email',email).eq('password',password).single();
+  btn.textContent='Sign In →';btn.disabled=false;
+  if(error||!data){showToast('❌ Wrong email or password');return;}
+  sessionStorage.setItem('campushub_user',JSON.stringify(data));
+  closeModal('auth');updateNavForUser(data);
   showToast(`🎉 Welcome back, ${data.name.split(' ')[0]}!`);
 }
-
-async function registerStudent() {
-  const name = document.getElementById('regName').value.trim();
-  const email = document.getElementById('regEmail').value.trim();
-  const branch = document.getElementById('regBranch').value;
-  const password = document.getElementById('regPassword').value;
-  if(!name || !email || !branch || !password) { showToast('⚠️ All fields are required'); return; }
-  if(password.length < 6) { showToast('⚠️ Password must be at least 6 characters'); return; }
-  if(!email.includes('@')) { showToast('⚠️ Please enter a valid email'); return; }
-  const btn = document.querySelector('#registerForm .btn-primary');
-  btn.textContent = 'Creating...'; btn.disabled = true;
-  // Check if email already exists
-  const { data: existing } = await db.from('students').select('id').eq('email', email).single();
-  if(existing) { btn.textContent = 'Create Account →'; btn.disabled = false; showToast('❌ This email is already registered'); return; }
-  const { data, error } = await db.from('students').insert([{ name, email, branch, password }]).select().single();
-  btn.textContent = 'Create Account →'; btn.disabled = false;
-  if(error) { showToast('❌ Error: ' + error.message); return; }
-  sessionStorage.setItem('campushub_user', JSON.stringify(data));
-  closeModal('auth');
-  updateNavForUser(data);
+async function registerStudent(){
+  const name=document.getElementById('regName').value.trim();
+  const email=document.getElementById('regEmail').value.trim();
+  const branch=document.getElementById('regBranch').value;
+  const password=document.getElementById('regPassword').value;
+  if(!name||!email||!branch||!password){showToast('⚠️ All fields required');return;}
+  if(password.length<6){showToast('⚠️ Password must be 6+ characters');return;}
+  const btn=document.querySelector('#registerForm .btn-primary');
+  btn.textContent='Creating...';btn.disabled=true;
+  const{data:ex}=await db.from('students').select('id').eq('email',email).single();
+  if(ex){btn.textContent='Create Account →';btn.disabled=false;showToast('❌ Email already registered');return;}
+  const{data,error}=await db.from('students').insert([{name,email,branch,password}]).select().single();
+  btn.textContent='Create Account →';btn.disabled=false;
+  if(error){showToast('❌ '+error.message);return;}
+  sessionStorage.setItem('campushub_user',JSON.stringify(data));
+  closeModal('auth');updateNavForUser(data);
   showToast(`🎉 Welcome to CampusHub, ${name.split(' ')[0]}!`);
 }
-
-function logoutStudent() {
+function logoutStudent(){
   sessionStorage.removeItem('campushub_user');
   updateNavForUser(null);
-  closeUserDropdown();
-  showToast('👋 Signed out successfully');
+  showToast('👋 Signed out');
 }
 
 // INIT
-async function init() {
-  // Restore session
-  const user = getCurrentUser();
-  if(user) updateNavForUser(user);
-  await Promise.all([loadClubs(), loadEvents(), loadRecruitments(), loadAnnouncements()]);
+async function init(){
+  const user=getCurrentUser();
+  if(user)updateNavForUser(user);
+  await Promise.all([loadClubs(),loadEvents(),loadRecruitments(),loadAnnouncements()]);
 }
 init();
 </script>
